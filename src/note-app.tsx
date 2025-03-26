@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNetworkStatus, useSync } from './hook'
 import styled from 'styled-components'
-import moment from 'moment'
 import { v4 as uuidv4 } from 'uuid'
 import SavedNoteItem from './note-app-item'
 
@@ -20,14 +19,17 @@ const defaultNote: Omit<INote, 'id'> = {
 
 const NotesApp = () => {
   const [note, setNote] = useState<INote>({ ...defaultNote, id: uuidv4() }) // Stores the current note being typed
-  const [notes, setNotes] = useState<INote[]>([]) // Stores the list of saved notes
   const [syncInProgress, setSyncInProgress] = useState<boolean>(false) // Stores the list of saved notes
 
   const debounceTimeout = useRef<number | null>(null) // Reference to track debounce timing
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null) // Reference text area
   const isOnline = useNetworkStatus() // Custom hook to check internet status
-  const { saveOfflineUpdate, getOfflineUpdates, clearOfflineUpdates } =
-    useSync<INote[]>() // Custom hook to manage offline storage
+  const {
+    saveOfflineUpdate,
+    getOfflineUpdates,
+    clearOfflineUpdates,
+    offlineData
+  } = useSync<INote>() // Custom hook to manage offline storage
 
   /**
    * Saves a note to the server.
@@ -62,17 +64,16 @@ const NotesApp = () => {
   const handleSaveNote = async (id: string, value: string) => {
     if (!value.trim()) return // Prevent saving empty notes
 
-    const filteredNotes = notes.filter((i) => i.id !== note.id)
+    const filteredNotes = offlineData?.filter((i) => i.id !== note.id) || []
     const updatedNote = { ...note, [id]: value, timeStamp: Date.now() }
     const modifiedNotes = [updatedNote, ...filteredNotes]
-    setNotes(modifiedNotes) // Update local state immediately for UI responsiveness
+    // setNotes(modifiedNotes) // Update local state immediately for UI responsiveness
 
     if (isOnline) {
       try {
         await saveNote(updatedNote) // Try saving online
-      } catch {
         await saveOfflineUpdate(modifiedNotes) // If it fails, store offline
-      }
+      } catch {}
     } else {
       await saveOfflineUpdate(modifiedNotes) // Save offline directly if offline
     }
@@ -101,8 +102,8 @@ const NotesApp = () => {
       clearTimeout(debounceTimeout.current) // Clear any existing timeout
     }
 
-    debounceTimeout.current = window.setTimeout(() => {
-      handleSaveNote(e.target.id, e.target.value) // Save after delay
+    debounceTimeout.current = window.setTimeout(async () => {
+      await handleSaveNote(e.target.id, e.target.value) // Save after delay
     }, 500)
   }
 
@@ -116,6 +117,7 @@ const NotesApp = () => {
     if (isOnline) {
       ;(async () => {
         const offlineNotes = await getOfflineUpdates()
+        console.log(offlineNotes, 'juju')
         if (offlineNotes.length > 0) {
           try {
             await Promise.all(offlineNotes.map(saveNote)) // Sync all offline notes
@@ -171,8 +173,8 @@ const NotesApp = () => {
           autoFocus
         />
         <button
-          onClick={() => {
-            handleSaveNote('text', note.text)
+          onClick={async () => {
+            await handleSaveNote('text', note.text)
           }}
           className="btn"
         >
@@ -181,13 +183,13 @@ const NotesApp = () => {
       </NoteClass>
       <SavedNoteClass>
         <h2>Saved Notes</h2>
-        {!notes?.length ? (
+        {!offlineData?.length ? (
           <p className="no-notes">No notes saved</p>
         ) : (
           <SavedNoteGridClass>
-            {notes.map((n) => (
+            {offlineData.map((n) => (
               <SavedNoteItem
-                key={moment(n.timeStamp).fromNow()}
+                key={n.id}
                 note={n}
                 onClick={() => {
                   handleEditNote(n)

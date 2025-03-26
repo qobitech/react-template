@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { openDB } from 'idb'
+import { IDBPDatabase, openDB } from 'idb'
 
 export const useNetworkStatus = (): boolean => {
   const [isOnline, setIsOnline] = useState(navigator.onLine)
@@ -21,45 +21,68 @@ export const useNetworkStatus = (): boolean => {
 }
 
 interface IUseSync<T = undefined> {
-  saveOfflineUpdate: (update: T) => Promise<void>
-  getOfflineUpdates: () => Promise<T>
+  saveOfflineUpdate: (update: T[]) => Promise<void>
+  getOfflineUpdates: () => Promise<T[]>
   clearOfflineUpdates: () => Promise<void>
-  offlineData: T | undefined
-  syncToServer: (syncFunction: (updates: T) => Promise<void>) => Promise<void>
+  offlineData: T[] | undefined
+  syncToServer: (syncFunction: (updates: T[]) => Promise<void>) => Promise<void>
 }
 
-export const useSync = <T>(): IUseSync<T> => {
-  const [offlineData, setOfflineData] = useState<T>()
+export const useSync = <T extends { id: string } = any>(): IUseSync<T> => {
+  const [offlineData, setOfflineData] = useState<T[]>([])
 
-  const saveOfflineUpdate = async (update: T) => {
-    const db = await openDB('SyncDB', 1, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains('updates')) {
-          db.createObjectStore('updates', {
-            keyPath: 'id',
-            autoIncrement: true
-          })
+  const saveOfflineUpdate = async (updates: T[]) => {
+    let db: IDBPDatabase<unknown> | null = null
+    try {
+      db = await openDB('SyncDB', 3, {
+        upgrade(db) {
+          if (!db.objectStoreNames.contains('updates')) {
+            db.createObjectStore('updates', { keyPath: 'id' })
+          }
         }
-      }
-    })
+      })
 
-    await db.put('updates', update)
-    setOfflineData(update)
+      if (db) {
+        const tx = db.transaction('updates', 'readwrite')
+        const store = tx.objectStore('updates')
+
+        for (const update of updates) {
+          await store.put(update)
+        }
+
+        await tx.done // Wait for the transaction to complete
+
+        const allUpdates = await db.getAll('updates')
+        setOfflineData(allUpdates)
+      }
+    } catch (error) {
+      console.error('Failed to save offline update:', error)
+      // Handle the error appropriately (e.g., show a user notification)
+    } finally {
+      if (db) {
+        db.close()
+      }
+    }
   }
 
-  const getOfflineUpdates = async (): Promise<T> => {
-    const db = await openDB('SyncDB', 1)
-    return (await db.getAll('updates')) as T
+  const getOfflineUpdates = async (): Promise<T[]> => {
+    const db = await openDB('SyncDB', 3)
+    const data = await db.getAll('updates')
+    setOfflineData(data)
+    return data
   }
 
   const clearOfflineUpdates = async () => {
     const db = await openDB('SyncDB', 1)
     await db.clear('updates')
+    setOfflineData([])
   }
 
-  const syncToServer = async (syncFunction: (updates: T) => Promise<void>) => {
+  const syncToServer = async (
+    syncFunction: (updates: T[]) => Promise<void>
+  ) => {
     const updates = await getOfflineUpdates()
-    if (Array.isArray(updates) && updates.length === 0) return
+    if (updates.length === 0) return
 
     try {
       await syncFunction(updates)
