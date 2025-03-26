@@ -230,16 +230,18 @@ const NoteClass = styled.form`
     padding: 7px;
     outline: none;
     min-height: 70px;
+    font-size: 16px;
   }
   .text-input {
     padding: 7px;
     outline: none;
+    font-size: 16px;
   }
 
   .btn {
     outline: none;
     border: none;
-    padding: 2px 5px;
+    padding: 10px 5px;
   }
   .btn-new {
     outline: none;
