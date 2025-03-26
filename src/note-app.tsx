@@ -185,15 +185,17 @@ const NotesApp = () => {
           <p className="no-notes">No notes saved</p>
         ) : (
           <SavedNoteGridClass>
-            {offlineData.map((n) => (
-              <SavedNoteItem
-                key={n.id}
-                note={n}
-                onClick={() => {
-                  handleEditNote(n)
-                }}
-              />
-            ))}
+            {offlineData
+              .sort((a, b) => b.timeStamp - a.timeStamp)
+              .map((n) => (
+                <SavedNoteItem
+                  key={n.id}
+                  note={n}
+                  onClick={() => {
+                    handleEditNote(n)
+                  }}
+                />
+              ))}
           </SavedNoteGridClass>
         )}
       </SavedNoteClass>
