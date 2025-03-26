@@ -276,6 +276,9 @@ const SavedNoteGridClass = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(40%, 1fr));
   gap: 19px;
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+  }
 `
 const StatusClass = styled.div`
   display: flex;
