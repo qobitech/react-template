@@ -242,6 +242,7 @@ const NoteClass = styled.form`
     outline: none;
     border: none;
     padding: 10px 5px;
+    border-radius: 5px;
   }
   .btn-new {
     outline: none;
