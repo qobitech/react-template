@@ -67,13 +67,14 @@ const NotesApp = () => {
     const filteredNotes = offlineData?.filter((i) => i.id !== note.id) || []
     const updatedNote = { ...note, [id]: value, timeStamp: Date.now() }
     const modifiedNotes = [updatedNote, ...filteredNotes]
-    // setNotes(modifiedNotes) // Update local state immediately for UI responsiveness
 
     if (isOnline) {
       try {
         await saveNote(updatedNote) // Try saving online
-        await saveOfflineUpdate(modifiedNotes) // If it fails, store offline
-      } catch {}
+        await saveOfflineUpdate(modifiedNotes)
+      } catch {
+        await saveOfflineUpdate(modifiedNotes) // If it fails, still store offline
+      }
     } else {
       await saveOfflineUpdate(modifiedNotes) // Save offline directly if offline
     }
