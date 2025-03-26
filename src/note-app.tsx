@@ -27,7 +27,7 @@ const NotesApp = () => {
   const {
     saveOfflineUpdate,
     getOfflineUpdates,
-    clearOfflineUpdates,
+    // clearOfflineUpdates,
     offlineData
   } = useSync<INote>() // Custom hook to manage offline storage
 
@@ -121,7 +121,7 @@ const NotesApp = () => {
         if (offlineData && offlineData.length > 0) {
           try {
             await Promise.all(offlineNotes.map(saveNote)) // Sync all offline notes
-            await clearOfflineUpdates() // Clear them after successful sync
+            // await clearOfflineUpdates() // Clear them after successful sync
           } catch {
             console.error('Failed to sync offline notes, keeping them stored')
           }
