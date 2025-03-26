@@ -65,11 +65,9 @@ const NotesApp = () => {
     if (!value.trim()) return // Prevent saving empty notes
 
     if (note.id) {
+      const filteredNotes = offlineData?.filter((i) => i.id !== note.id) || []
       const updatedNote = { ...note, [id]: value, timeStamp: Date.now() }
-      const modifiedNotes = [
-        updatedNote,
-        ...(offlineData || []).filter((i) => i.id !== note.id)
-      ]
+      const modifiedNotes = [updatedNote, ...filteredNotes]
       try {
         await saveOfflineUpdate(modifiedNotes)
         if (isOnline) await saveNote(updatedNote) // Try saving online
