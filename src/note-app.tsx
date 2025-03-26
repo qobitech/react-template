@@ -64,19 +64,19 @@ const NotesApp = () => {
   const handleSaveNote = async (id: string, value: string) => {
     if (!value.trim()) return // Prevent saving empty notes
 
-    const filteredNotes = offlineData?.filter((i) => i.id !== note.id) || []
-    const updatedNote = { ...note, [id]: value, timeStamp: Date.now() }
-    const modifiedNotes = [updatedNote, ...filteredNotes]
-
-    if (isOnline) {
+    if (note.id) {
+      const updatedNote = { ...note, [id]: value, timeStamp: Date.now() }
+      const modifiedNotes = [
+        updatedNote,
+        ...(offlineData || []).filter((i) => i.id !== note.id)
+      ]
       try {
-        await saveNote(updatedNote) // Try saving online
         await saveOfflineUpdate(modifiedNotes)
-      } catch {
-        await saveOfflineUpdate(modifiedNotes) // If it fails, still store offline
+        if (isOnline) await saveNote(updatedNote) // Try saving online
+      } catch (error) {
+        console.error('Failed to save note:', error)
+        // Optionally add error handling or user notification
       }
-    } else {
-      await saveOfflineUpdate(modifiedNotes) // Save offline directly if offline
     }
   }
 
@@ -118,8 +118,7 @@ const NotesApp = () => {
     if (isOnline) {
       ;(async () => {
         const offlineNotes = await getOfflineUpdates()
-        console.log(offlineNotes, 'juju')
-        if (offlineNotes.length > 0) {
+        if (offlineData && offlineData.length > 0) {
           try {
             await Promise.all(offlineNotes.map(saveNote)) // Sync all offline notes
             await clearOfflineUpdates() // Clear them after successful sync
