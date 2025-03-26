@@ -211,7 +211,8 @@ const ContainerClass = styled.div`
   display: flex;
   flex-direction: column;
   margin: auto;
-  width: 700px;
+  max-width: 700px;
+  width: 95%;
   gap: 30px;
   padding: 30px 0;
 `
