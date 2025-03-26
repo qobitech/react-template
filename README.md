@@ -36,8 +36,6 @@ The app uses useState to track:
 
 - note: Currently edited note
 
-- notes: List of saved notes
-
 - syncInProgress: Sync status
 
 ### Network Status Tracking
