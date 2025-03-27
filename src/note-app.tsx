@@ -27,8 +27,9 @@ const NotesApp = () => {
   const {
     saveOfflineUpdate,
     getOfflineUpdates,
-    // clearOfflineUpdates,
-    offlineData
+    clearOfflineUpdates,
+    offlineData,
+    removeOfflineItem
   } = useSync<INote>() // Custom hook to manage offline storage
 
   /**
@@ -136,6 +137,10 @@ const NotesApp = () => {
     }
   }, [])
 
+  const handleClearAll = async () => {
+    await clearOfflineUpdates() // Clear them after successful sync
+  }
+
   return (
     <ContainerClass>
       <StatusClass>
@@ -182,7 +187,19 @@ const NotesApp = () => {
         </button>
       </NoteClass>
       <SavedNoteClass>
-        <h2>Saved Notes</h2>
+        <SavedNoteHeaderClass>
+          <h2>Saved Notes</h2>
+          {offlineData?.length ? (
+            <button
+              onClick={async () => {
+                await handleClearAll()
+              }}
+              className="btn-clear"
+            >
+              Clear All
+            </button>
+          ) : null}
+        </SavedNoteHeaderClass>
         {!offlineData?.length ? (
           <p className="no-notes">No notes saved</p>
         ) : (
@@ -195,6 +212,9 @@ const NotesApp = () => {
                   note={n}
                   onClick={() => {
                     handleEditNote(n)
+                  }}
+                  onDelete={async () => {
+                    await removeOfflineItem(n.id)
                   }}
                 />
               ))}
@@ -267,10 +287,26 @@ const SavedNoteClass = styled.div`
     font-size: 11px;
     opacity: 0.7;
   }
+`
+
+const SavedNoteHeaderClass = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   h2 {
     font-size: 21px;
+    margin: 0;
+  }
+  .btn-clear {
+    outline: none;
+    border: 1px solid #eaeaea;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 2px 5px;
   }
 `
+
 const HeaderClass = styled.div`
   display: flex;
   align-items: center;
