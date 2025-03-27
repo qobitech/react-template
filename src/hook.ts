@@ -26,6 +26,7 @@ interface IUseSync<T = undefined> {
   getOfflineUpdates: () => Promise<T[]>
   offlineData: T[] | undefined
   syncToServer: (syncFunction: (updates: T[]) => Promise<void>) => Promise<void>
+  removeOfflineItem: (id: string) => Promise<void>
 }
 
 export const useSync = <T extends { id: string } = any>(): IUseSync<T> => {
@@ -70,17 +71,6 @@ export const useSync = <T extends { id: string } = any>(): IUseSync<T> => {
     }
   }
 
-  // const getOfflineUpdates = async (): Promise<T[]> => {
-  //   const db = await openDB('SyncDB', version)
-  //   try {
-  //     const data = await db.getAll('updates')
-  //     setOfflineData(data)
-  //     return data
-  //   } catch {
-  //     return []
-  //   }
-  // }
-
   const getOfflineUpdates = async (): Promise<T[]> => {
     try {
       const db = await openDB('SyncDB', version, {
@@ -122,6 +112,13 @@ export const useSync = <T extends { id: string } = any>(): IUseSync<T> => {
     setOfflineData([])
   }
 
+  const removeOfflineItem = async (id: string) => {
+    const db = await openDB('SyncDB', version)
+    await db.delete('updates', id)
+    // Optionally, update the local state by filtering out the removed item
+    setOfflineData((prevData) => prevData.filter((item) => item.id !== id))
+  }
+
   const syncToServer = async (
     syncFunction: (updates: T[]) => Promise<void>
   ) => {
@@ -142,6 +139,7 @@ export const useSync = <T extends { id: string } = any>(): IUseSync<T> => {
     clearOfflineUpdates,
     getOfflineUpdates,
     offlineData,
-    syncToServer
+    syncToServer,
+    removeOfflineItem
   }
 }
