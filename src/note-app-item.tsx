@@ -13,10 +13,8 @@ interface ISavedNoteItem {
 const SavedNoteItem: FC<ISavedNoteItem> = ({ note, onClick, onDelete }) => {
   return (
     <SavedNoteItemWarpperClass>
-      <SavedNoteItemClass>
-        <h5 className="header" onClick={onClick}>
-          {note.title || note.text}
-        </h5>
+      <SavedNoteItemClass onClick={onClick}>
+        <h5 className="header">{note.title || note.text}</h5>
         <p className="time-stamp">
           {new Date(note.timeStamp).toDateString()}&nbsp;&nbsp;{' '}
           <span className="time">{moment(note.timeStamp).fromNow()}</span>
