@@ -129,7 +129,7 @@ const NotesApp = () => {
         const offlineNotes = await getOfflineUpdates()
         if (offlineData && offlineData.length > 0) {
           try {
-            await Promise.all(offlineNotes.map(saveNote)) // Sync all offline notes
+            await Promise.all(offlineNotes?.map(saveNote)) // Sync all offline notes
             // await clearOfflineUpdates() // Clear them after successful sync
           } catch {
             console.error('Failed to sync offline notes, keeping them stored')
@@ -152,19 +152,22 @@ const NotesApp = () => {
   const onAddTodo = () => {
     setNote((prev) => ({
       ...prev,
-      todo: [...prev.todo, { id: uuidv4(), subject: '', status: 'not-started' }]
+      todo: [
+        ...(prev?.todo || []),
+        { id: uuidv4(), subject: '', status: 'not-started' }
+      ]
     }))
   }
 
   const onSaveTodo = useCallback(
     async (todoItem: ITodo) => {
       setNote((prevNote) => {
-        const modifiedTodo = prevNote.todo.map((i) =>
-          i.id === todoItem.id ? todoItem : i
-        )
+        const modifiedTodo =
+          prevNote?.todo?.map((i) => (i.id === todoItem.id ? todoItem : i)) ||
+          []
         const updatedNote = { ...prevNote, todo: modifiedTodo }
 
-        handleSaveNote('todo', updatedNote.todo)
+        handleSaveNote('todo', updatedNote?.todo || [])
 
         return updatedNote
       })
@@ -177,10 +180,10 @@ const NotesApp = () => {
       setNote((prevNote) => {
         const updatedNote = {
           ...prevNote,
-          todo: prevNote.todo.filter((i) => i.id !== id)
+          todo: prevNote?.todo?.filter((i) => i.id !== id) || []
         }
 
-        handleSaveNote('todo', updatedNote.todo)
+        handleSaveNote('todo', updatedNote?.todo || [])
 
         return updatedNote
       })
@@ -230,7 +233,7 @@ const NotesApp = () => {
         />
 
         <TodoListContainerClass>
-          {note.todo.map((todo) => (
+          {note?.todo?.map((todo) => (
             <TodoItem
               todo={todo}
               onSaveTodo={onSaveTodo}
@@ -280,7 +283,7 @@ const NotesApp = () => {
           <SavedNoteGridClass>
             {offlineData
               .sort((a, b) => b.timeStamp - a.timeStamp)
-              .map((n) => (
+              ?.map((n) => (
                 <SavedNoteItem
                   key={n.id}
                   note={n}
