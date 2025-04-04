@@ -3,18 +3,21 @@ import { useNetworkStatus, useSync } from './hook'
 import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
 import SavedNoteItem from './note-app-item'
+import TodoItem, { ITodo } from './todo-item'
 
 export interface INote {
   id: string
   text: string
   title: string
   timeStamp: number
+  todo: ITodo[]
 }
 
 const defaultNote: Omit<INote, 'id'> = {
   text: '',
   title: '',
-  timeStamp: Date.now()
+  timeStamp: Date.now(),
+  todo: []
 }
 
 const NotesApp = () => {
@@ -62,15 +65,20 @@ const NotesApp = () => {
    * - If online, it tries to save the note to the server.
    * - If the request fails, or if offline, it saves the note locally.
    */
-  const handleSaveNote = async (id: string, value: string) => {
-    if (!value.trim()) return // Prevent saving empty notes
+  const handleSaveNote = async <K extends keyof INote>(
+    id: K,
+    value: INote[K]
+  ) => {
+    if (!value) return // Prevent saving empty notes
 
     if (note.id) {
       const updatedNote = { ...note, [id]: value, timeStamp: Date.now() }
+
       const modifiedNotes = [
         updatedNote,
         ...(offlineData || []).filter((i) => i.id !== note.id)
       ]
+
       try {
         await saveOfflineUpdate(modifiedNotes)
         if (isOnline) await saveNote(updatedNote) // Try saving online
@@ -105,7 +113,7 @@ const NotesApp = () => {
     }
 
     debounceTimeout.current = window.setTimeout(async () => {
-      await handleSaveNote(e.target.id, e.target.value) // Save after delay
+      await handleSaveNote(e.target.id as keyof INote, e.target.value) // Save after delay
     }, 500)
   }
 
@@ -141,26 +149,68 @@ const NotesApp = () => {
     await clearOfflineUpdates() // Clear them after successful sync
   }
 
+  const onAddTodo = () => {
+    setNote((prev) => ({
+      ...prev,
+      todo: [...prev.todo, { id: uuidv4(), subject: '', status: 'not-started' }]
+    }))
+  }
+
+  const onSaveTodo = useCallback(
+    async (todoItem: ITodo) => {
+      setNote((prevNote) => {
+        const modifiedTodo = prevNote.todo.map((i) =>
+          i.id === todoItem.id ? todoItem : i
+        )
+        const updatedNote = { ...prevNote, todo: modifiedTodo }
+
+        handleSaveNote('todo', updatedNote.todo)
+
+        return updatedNote
+      })
+    },
+    [note]
+  )
+
+  const deleteTodo = useCallback(
+    async (id: string) => {
+      setNote((prevNote) => {
+        const updatedNote = {
+          ...prevNote,
+          todo: prevNote.todo.filter((i) => i.id !== id)
+        }
+
+        handleSaveNote('todo', updatedNote.todo)
+
+        return updatedNote
+      })
+    },
+    [note]
+  )
+
   return (
     <ContainerClass>
       <StatusClass>
         <p className={`status-sync ${isOnline ? 'online' : 'offline'}`}>
           Status: {isOnline ? 'Online' : 'Offline'}
         </p>
+
         <p className="status-sync">{syncInProgress ? 'Syncing...' : ''}</p>
       </StatusClass>
+
       <NoteClass onSubmit={(e) => e.preventDefault()}>
         <HeaderClass>
           <h1>Note App</h1>
-          <button
+
+          <ButtonComponent
             onClick={() => {
               handleNewNote()
             }}
-            className="btn-new"
           >
             New Note +
-          </button>
+          </ButtonComponent>
         </HeaderClass>
+
         <input
           value={note.title}
           placeholder="Title"
@@ -168,6 +218,7 @@ const NotesApp = () => {
           onChange={handleDebouncedSaveNote}
           id="title"
         />
+
         <textarea
           value={note.text}
           onChange={handleDebouncedSaveNote}
@@ -177,6 +228,27 @@ const NotesApp = () => {
           id="text"
           autoFocus
         />
+
+        <TodoListContainerClass>
+          {note.todo.map((todo) => (
+            <TodoItem
+              todo={todo}
+              onSaveTodo={onSaveTodo}
+              deleteTodo={deleteTodo}
+              key={todo.id}
+            />
+          ))}
+        </TodoListContainerClass>
+
+        <UtilityContainerClass>
+          <ButtonComponent
+            onClick={onAddTodo}
+            disabled={!note.title && !note.text}
+          >
+            Add Todo list
+          </ButtonComponent>
+        </UtilityContainerClass>
+
         <button
           onClick={async () => {
             await handleSaveNote('text', note.text)
@@ -186,20 +258,22 @@ const NotesApp = () => {
           Save Note
         </button>
       </NoteClass>
+
       <SavedNoteClass>
         <SavedNoteHeaderClass>
           <h2>Saved Notes</h2>
+
           {offlineData?.length ? (
-            <button
+            <ButtonComponent
               onClick={async () => {
                 await handleClearAll()
               }}
-              className="btn-clear"
             >
               Clear All
-            </button>
+            </ButtonComponent>
           ) : null}
         </SavedNoteHeaderClass>
+
         {!offlineData?.length ? (
           <p className="no-notes">No notes saved</p>
         ) : (
@@ -264,14 +338,6 @@ const NoteClass = styled.form`
     padding: 10px 5px;
     border-radius: 5px;
   }
-  .btn-new {
-    outline: none;
-    border: 1px solid #eaeaea;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 12px;
-    padding: 2px 5px;
-  }
 `
 const SavedNoteClass = styled.div`
   display: flex;
@@ -296,14 +362,6 @@ const SavedNoteHeaderClass = styled.div`
   h2 {
     font-size: 21px;
     margin: 0;
-  }
-  .btn-clear {
-    outline: none;
-    border: 1px solid #eaeaea;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 12px;
-    padding: 2px 5px;
   }
 `
 
@@ -333,4 +391,24 @@ const StatusClass = styled.div`
       color: red;
     }
   }
+`
+const UtilityContainerClass = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
+`
+
+const TodoListContainerClass = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`
+
+const ButtonComponent = styled.button`
+  outline: none;
+  border: 1px solid #eaeaea;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 12px;
+  padding: 2px 5px;
 `
