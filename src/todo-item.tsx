@@ -195,6 +195,7 @@ const TodoInput = styled.input`
   border: none;
   outline: none;
   background: transparent;
+  font-size: 12px;
 `
 
 const TodoStatusController = styled.select`
