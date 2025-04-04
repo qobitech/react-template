@@ -18,9 +18,15 @@ export interface ITodoItem {
   todo: ITodo
   onSaveTodo: (todo: ITodo) => Promise<void>
   deleteTodo: (id: string) => Promise<void>
+  saveBtnRef: React.RefObject<HTMLDivElement | null>
 }
 
-const TodoItem: FC<ITodoItem> = ({ todo, onSaveTodo, deleteTodo }) => {
+const TodoItem: FC<ITodoItem> = ({
+  todo,
+  onSaveTodo,
+  deleteTodo,
+  saveBtnRef
+}) => {
   const debounceTimeout = useRef<number | null>(null) // Reference to track debounce timing
   const [onEdit, setOnEdit] = useState<boolean>(!todo.subject)
   const [formData, setFormData] = useState<ITodo>(todo)
@@ -88,7 +94,9 @@ const TodoItem: FC<ITodoItem> = ({ todo, onSaveTodo, deleteTodo }) => {
         )}
 
         {onEdit ? (
-          <CheckSVG className="save" onClick={onSave} />
+          <SaveContainerClass onClick={onSave} ref={saveBtnRef}>
+            <CheckSVG className="save" />
+          </SaveContainerClass>
         ) : (
           <EditSVG onClick={enableEdit} />
         )}
@@ -170,4 +178,10 @@ const TodoStatusController = styled.select`
   outline: none;
   background: transparent;
   font-size: 11px;
+`
+
+const SaveContainerClass = styled.div`
+  height: max-content;
+  width: max-content;
+  cursor: pointer;
 `
