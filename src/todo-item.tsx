@@ -1,6 +1,6 @@
-import { FC, useRef, useState } from 'react'
+import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-import { CheckSVG, EditSVG, TrashSVG } from './svg'
+import { CheckSVG, CloseSVG, EditSVG, TrashSVG } from './svg'
 
 export type todoStatusType =
   | 'completed'
@@ -18,18 +18,32 @@ export interface ITodoItem {
   todo: ITodo
   onSaveTodo: (todo: ITodo) => Promise<void>
   deleteTodo: (id: string) => Promise<void>
-  saveBtnRef: React.RefObject<HTMLDivElement | null>
 }
 
-const TodoItem: FC<ITodoItem> = ({
-  todo,
-  onSaveTodo,
-  deleteTodo,
-  saveBtnRef
-}) => {
+const TodoItem: FC<ITodoItem> = ({ todo, onSaveTodo, deleteTodo }) => {
   const debounceTimeout = useRef<number | null>(null) // Reference to track debounce timing
+  const wrapperRef = useRef<HTMLDivElement>(null)
+
   const [onEdit, setOnEdit] = useState<boolean>(!todo.subject)
   const [formData, setFormData] = useState<ITodo>(todo)
+
+  const handleClick = useCallback(
+    (event: MouseEvent) => {
+      if (wrapperRef.current?.contains(event.target as Node)) {
+        setOnEdit(true) // Clicked inside
+      } else {
+        setOnEdit(!formData.subject) // Clicked outside
+      }
+    },
+    [formData]
+  )
+
+  useEffect(() => {
+    document.addEventListener('click', handleClick)
+    return () => {
+      document.removeEventListener('click', handleClick)
+    }
+  }, [handleClick])
 
   const onSave = () => {
     // check if any note item is empty saving
@@ -39,10 +53,6 @@ const TodoItem: FC<ITodoItem> = ({
       onSaveTodo(formData)
       setOnEdit(false)
     }
-  }
-
-  const enableEdit = () => {
-    setOnEdit(true)
   }
 
   const handleOnChange = (
@@ -62,51 +72,54 @@ const TodoItem: FC<ITodoItem> = ({
   }
 
   return (
-    <TodoItemClass>
-      {!onEdit && (
+    <TodoItemWrapperClass>
+      {!onEdit ? (
         <TrashSVG onClick={async () => await deleteTodo(formData.id)} />
-      )}
-
-      {onEdit ? (
-        <TodoInput
-          autoFocus
-          placeholder="Todo subject"
-          onChange={handleOnChange}
-          value={formData.subject}
-          id="subject"
-        />
       ) : (
-        <p className="subject" onClick={enableEdit}>
-          {todo.subject}
-        </p>
+        <CloseSVG
+          className="close"
+          onClick={async () => await deleteTodo(formData.id)}
+        />
       )}
 
-      <div className="others">
+      <TodoItemClass ref={wrapperRef}>
         {onEdit ? (
-          <TodoStatusController
-            value={formData.status}
+          <TodoInput
+            autoFocus
+            placeholder="Todo subject"
             onChange={handleOnChange}
-            id="status"
-          >
-            <option value="">Select status</option>
-            <option value="completed">completed</option>
-            <option value="not-started">not-started</option>
-            <option value="in-progress">in-progress</option>
-            <option value="blocked">blocked</option>
-          </TodoStatusController>
+            value={formData.subject}
+            id="subject"
+          />
         ) : (
-          <TodoStatus $status={todo.status}>{todo.status}</TodoStatus>
+          <p className="subject">{todo.subject}</p>
         )}
 
-        {onEdit ? (
-          <SaveContainerClass onClick={onSave} ref={saveBtnRef}>
-            <CheckSVG className="save" />
-          </SaveContainerClass>
-        ) : (
-          <EditSVG onClick={enableEdit} />
-        )}
-      </div>
-    </TodoItemClass>
+        <div className="others">
+          {onEdit ? (
+            <TodoStatusController
+              value={formData.status}
+              onChange={handleOnChange}
+              id="status"
+            >
+              <option value="">Select status</option>
+              <option value="completed">completed</option>
+              <option value="not-started">not-started</option>
+              <option value="in-progress">in-progress</option>
+              <option value="blocked">blocked</option>
+            </TodoStatusController>
+          ) : (
+            <TodoStatus $status={todo.status}>{todo.status}</TodoStatus>
+          )}
+
+          {onEdit ? (
+            <CheckSVG className="save" onClick={onSave} />
+          ) : (
+            <EditSVG />
+          )}
+        </div>
+      </TodoItemClass>
+    </TodoItemWrapperClass>
   )
 }
 
@@ -127,7 +140,7 @@ const TodoStatus = styled.div<{ $status: todoStatusType }>`
   }}
 `
 
-const TodoItemClass = styled.div`
+const TodoItemWrapperClass = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
@@ -136,12 +149,20 @@ const TodoItemClass = styled.div`
   border-bottom: 1px solid #eaeaea;
   flex-shrink: 0;
   width: 100%;
+`
+
+const TodoItemClass = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-sizing: border-box;
+  width: 100%;
   .others {
     margin-left: auto;
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: 35px;
+    gap: 25px;
   }
   .subject {
     font-size: 11px;
@@ -150,7 +171,6 @@ const TodoItemClass = styled.div`
     text-overflow: ellipsis;
     white-space: nowrap;
     width: 50%;
-    cursor: pointer;
   }
   .time-stamp {
     font-size: 10px;
@@ -183,10 +203,4 @@ const TodoStatusController = styled.select`
   outline: none;
   background: transparent;
   font-size: 11px;
-`
-
-const SaveContainerClass = styled.div`
-  height: max-content;
-  width: max-content;
-  cursor: pointer;
 `
