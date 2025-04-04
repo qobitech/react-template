@@ -26,7 +26,10 @@ const NotesApp = () => {
 
   const debounceTimeout = useRef<number | null>(null) // Reference to track debounce timing
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null) // Reference text area
+  const saveBtnRef = useRef<HTMLDivElement | null>(null) // Reference text area
+
   const isOnline = useNetworkStatus() // Custom hook to check internet status
+
   const {
     saveOfflineUpdate,
     getOfflineUpdates,
@@ -150,13 +153,18 @@ const NotesApp = () => {
   }
 
   const onAddTodo = () => {
-    setNote((prev) => ({
-      ...prev,
-      todo: [
-        ...(prev?.todo || []),
-        { id: uuidv4(), subject: '', status: 'not-started' }
-      ]
-    }))
+    // progammaticalLy click save button to save and close open note item
+    saveBtnRef?.current?.click()
+    // check if any note item is empty before adding a new note item
+    if (note.todo.every((todoItem) => todoItem.subject)) {
+      setNote((prev) => ({
+        ...prev,
+        todo: [
+          ...(prev?.todo || []),
+          { id: uuidv4(), subject: '', status: 'not-started' }
+        ]
+      }))
+    }
   }
 
   const onSaveTodo = useCallback(
@@ -239,6 +247,7 @@ const NotesApp = () => {
               onSaveTodo={onSaveTodo}
               deleteTodo={deleteTodo}
               key={todo.id}
+              saveBtnRef={saveBtnRef}
             />
           ))}
         </TodoListContainerClass>

@@ -32,8 +32,13 @@ const TodoItem: FC<ITodoItem> = ({
   const [formData, setFormData] = useState<ITodo>(todo)
 
   const onSave = () => {
-    onSaveTodo(formData)
-    setOnEdit(false)
+    // check if any note item is empty saving
+    if (!formData.subject) {
+      alert('You can’t save an empty note.')
+    } else {
+      onSaveTodo(formData)
+      setOnEdit(false)
+    }
   }
 
   const enableEdit = () => {
