@@ -78,7 +78,13 @@ const TodoItem: FC<ITodoItem> = ({ todo, onSaveTodo, deleteTodo }) => {
       ) : (
         <CloseSVG
           className="close"
-          onClick={async () => await deleteTodo(formData.id)}
+          onClick={async () => {
+            if (!formData.subject) {
+              await deleteTodo(formData.id)
+            } else {
+              setOnEdit(false)
+            }
+          }}
         />
       )}
 
