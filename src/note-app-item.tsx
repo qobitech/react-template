@@ -2,7 +2,7 @@ import { FC } from 'react'
 import styled from 'styled-components'
 import moment from 'moment'
 import { INote } from './note-app'
-import { TrashSVG } from './svg'
+import { TrashSVG } from './svg-icons'
 
 interface ISavedNoteItem {
   note: INote
@@ -15,13 +15,19 @@ const SavedNoteItem: FC<ISavedNoteItem> = ({ note, onClick, onDelete }) => {
     <SavedNoteItemWarpperClass>
       <SavedNoteItemClass onClick={onClick}>
         <h5 className="header">{note.title || note.text}</h5>
+
         <p className="time-stamp">
           {new Date(note.timeStamp).toDateString()}&nbsp;&nbsp;{' '}
           <span className="time">{moment(note.timeStamp).fromNow()}</span>
         </p>
       </SavedNoteItemClass>
+
       <CTAClass>
-        <TrashSVG onClick={onDelete} />
+        <TrashSVG
+          onClick={onDelete}
+          aria-label="Delete note item"
+          focusable="true"
+        />
       </CTAClass>
     </SavedNoteItemWarpperClass>
   )

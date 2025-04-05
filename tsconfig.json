@@ -15,8 +15,8 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["vite/client"] // Add Jest types
+    "types": ["vite/client", "vitest/globals"] // Add Jest types
   },
-  "include": [".d.ts", "**/*.ts", "**/*.tsx", "__tests__/page-all.test.js"],
+  "include": [".d.ts", "**/*.ts", "**/*.tsx", "__tests__/*.test.js"],
   "exclude": ["node_modules"]
 }

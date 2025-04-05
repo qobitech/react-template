@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test": "vitest --ui --coverage.enabled=true",
+    "coverage": "vitest run --coverage",
     "preview": "vite preview",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "type-check": "tsc --noEmit"
@@ -28,11 +30,17 @@
   },
   "type": "module",
   "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.5.2",
     "@types/node": "^22.13.13",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "3.1.1",
+    "@vitest/ui": "3.1.1",
     "eslint": "^8.0.1",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard-with-typescript": "^23.0.0",
@@ -42,11 +50,13 @@
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
+    "jsdom": "^26.0.0",
     "lint": "^0.7.0",
     "prettier": "^2.8.0",
     "prettier-eslint-cli": "^7.1.0",
     "typescript": "^5.8.2",
     "vite": "^6.2.3",
-    "vite-plugin-checker": "^0.9.1"
+    "vite-plugin-checker": "^0.9.1",
+    "vitest": "^3.1.1"
   }
 }

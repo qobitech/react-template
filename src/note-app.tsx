@@ -203,7 +203,7 @@ const NotesApp = () => {
         <p className="status-sync">{syncInProgress ? 'Syncing...' : ''}</p>
       </StatusClass>
 
-      <NoteClass onSubmit={(e) => e.preventDefault()}>
+      <NoteClass>
         <HeaderClass>
           <h1>Note App</h1>
 
@@ -315,7 +315,7 @@ const ContainerClass = styled.div`
   gap: 30px;
   padding: 30px 0;
 `
-const NoteClass = styled.form`
+const NoteClass = styled.div`
   display: flex;
   flex-direction: column;
   margin: auto;

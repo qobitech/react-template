@@ -1,6 +1,9 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-import { CheckSVG, CloseSVG, EditSVG, TrashSVG } from './svg'
+import DeleteClose from './components/delete-close'
+import InputText from './components/input-text'
+import SelectStatusText from './components/select-status-text'
+import EditSave from './components/edit-save'
 
 export type todoStatusType =
   | 'completed'
@@ -22,17 +25,17 @@ export interface ITodoItem {
 
 const TodoItem: FC<ITodoItem> = ({ todo, onSaveTodo, deleteTodo }) => {
   const debounceTimeout = useRef<number | null>(null) // Reference to track debounce timing
-  const wrapperRef = useRef<HTMLDivElement>(null)
+  const wrapperRef = useRef<HTMLFormElement>(null)
 
-  const [onEdit, setOnEdit] = useState<boolean>(!todo.subject)
+  const [isEdit, setIsEdit] = useState<boolean>(!todo.subject)
   const [formData, setFormData] = useState<ITodo>(todo)
 
   const handleClick = useCallback(
     (event: MouseEvent) => {
       if (wrapperRef.current?.contains(event.target as Node)) {
-        setOnEdit(true) // Clicked inside
+        setIsEdit(true) // Clicked inside
       } else {
-        setOnEdit(!formData.subject) // Clicked outside
+        setIsEdit(!formData.subject) // Clicked outside
       }
     },
     [formData]
@@ -51,7 +54,7 @@ const TodoItem: FC<ITodoItem> = ({ todo, onSaveTodo, deleteTodo }) => {
       alert('You can’t save an empty note.')
     } else {
       onSaveTodo(formData)
-      setOnEdit(false)
+      setIsEdit(false)
     }
   }
 
@@ -71,80 +74,50 @@ const TodoItem: FC<ITodoItem> = ({ todo, onSaveTodo, deleteTodo }) => {
     }, 500)
   }
 
+  const onExitNote = async () => {
+    if (!formData.subject) {
+      await deleteTodo(formData.id)
+    } else {
+      setIsEdit(false)
+    }
+  }
+
   return (
     <TodoItemWrapperClass>
-      {!onEdit ? (
-        <TrashSVG onClick={async () => await deleteTodo(formData.id)} />
-      ) : (
-        <CloseSVG
-          className="close"
-          onClick={async () => {
-            if (!formData.subject) {
-              await deleteTodo(formData.id)
-            } else {
-              setOnEdit(false)
-            }
-          }}
+      <DeleteClose
+        isEdit={isEdit}
+        onDelete={async () => await deleteTodo(formData.id)}
+        onClose={async () => await onExitNote()}
+      />
+
+      <TodoItemClass
+        ref={wrapperRef}
+        onSubmit={(e) => {
+          e.preventDefault()
+          onSave()
+        }}
+      >
+        <InputText
+          isEdit={isEdit}
+          handleOnChange={handleOnChange}
+          subject={formData.subject}
         />
-      )}
 
-      <TodoItemClass ref={wrapperRef}>
-        {onEdit ? (
-          <TodoInput
-            autoFocus
-            placeholder="Todo subject"
-            onChange={handleOnChange}
-            value={formData.subject}
-            id="subject"
+        <TodoItemController>
+          <SelectStatusText
+            isEdit={isEdit}
+            handleOnChange={handleOnChange}
+            status={formData.status}
           />
-        ) : (
-          <p className="subject">{todo.subject}</p>
-        )}
 
-        <div className="others">
-          {onEdit ? (
-            <TodoStatusController
-              value={formData.status}
-              onChange={handleOnChange}
-              id="status"
-            >
-              <option value="">Select status</option>
-              <option value="completed">completed</option>
-              <option value="not-started">not-started</option>
-              <option value="in-progress">in-progress</option>
-              <option value="blocked">blocked</option>
-            </TodoStatusController>
-          ) : (
-            <TodoStatus $status={todo.status}>{todo.status}</TodoStatus>
-          )}
-
-          {onEdit ? (
-            <CheckSVG className="save" onClick={onSave} />
-          ) : (
-            <EditSVG />
-          )}
-        </div>
+          <EditSave isEdit={isEdit} onSave={onSave} />
+        </TodoItemController>
       </TodoItemClass>
     </TodoItemWrapperClass>
   )
 }
 
 export default TodoItem
-
-const TodoStatus = styled.div<{ $status: todoStatusType }>`
-  font-size: 10px;
-  margin: 0;
-  ${({ $status }) => {
-    const obj: Record<todoStatusType, string> = {
-      blocked: 'red',
-      completed: 'green',
-      'not-started': 'gray',
-      'in-progress': 'orange'
-    }
-    const color = obj[$status]
-    return `color: ${color};`
-  }}
-`
 
 const TodoItemWrapperClass = styled.div`
   display: flex;
@@ -157,57 +130,18 @@ const TodoItemWrapperClass = styled.div`
   width: 100%;
 `
 
-const TodoItemClass = styled.div`
+const TodoItemClass = styled.form`
   display: flex;
   align-items: center;
   gap: 15px;
   box-sizing: border-box;
   width: 100%;
-  .others {
-    margin-left: auto;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 25px;
-  }
-  .subject {
-    font-size: 11px;
-    margin: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    width: 50%;
-  }
-  .time-stamp {
-    font-size: 10px;
-    opacity: 0.8;
-    margin: 0;
-  }
-  .time {
-    opacity: 0.6;
-  }
-  .save {
-    cursor: pointer;
-  }
-  .save path {
-    fill: green;
-    color: green;
-  }
 `
 
-const TodoInput = styled.input`
-  width: 70%;
-  height: 25px;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 12px;
-`
-
-const TodoStatusController = styled.select`
-  height: 25px;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 11px;
+const TodoItemController = styled.div`
+  margin-left: auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 25px;
 `
