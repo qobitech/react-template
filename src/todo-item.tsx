@@ -48,8 +48,9 @@ const TodoItem: FC<ITodoItem> = ({ todo, onSaveTodo, deleteTodo }) => {
     }
   }, [handleClick])
 
-  const onSave = () => {
-    // check if any note item is empty saving
+  const onSave = (e?: React.FormEvent<HTMLFormElement>) => {
+    e?.preventDefault()
+    // check if note item subject is empty
     if (!formData.subject) {
       alert('You can’t save an empty note.')
     } else {
@@ -58,21 +59,22 @@ const TodoItem: FC<ITodoItem> = ({ todo, onSaveTodo, deleteTodo }) => {
     }
   }
 
-  const handleOnChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const fd = { ...formData, [e.target.id]: e.target.value }
+  const handleOnChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const fd = { ...formData, [e.target.id]: e.target.value }
 
-    setFormData(fd)
+      setFormData(fd)
 
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current) // Clear any existing timeout
-    }
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current) // Clear any existing timeout
+      }
 
-    debounceTimeout.current = window.setTimeout(async () => {
-      await onSaveTodo(fd) // Save after delay
-    }, 500)
-  }
+      debounceTimeout.current = window.setTimeout(async () => {
+        await onSaveTodo(fd) // Save after delay
+      }, 500)
+    },
+    []
+  )
 
   const onExitNote = async () => {
     if (!formData.subject) {
@@ -90,13 +92,7 @@ const TodoItem: FC<ITodoItem> = ({ todo, onSaveTodo, deleteTodo }) => {
         onClose={async () => await onExitNote()}
       />
 
-      <TodoItemClass
-        ref={wrapperRef}
-        onSubmit={(e) => {
-          e.preventDefault()
-          onSave()
-        }}
-      >
+      <TodoItemClass ref={wrapperRef} onSubmit={onSave}>
         <InputText
           isEdit={isEdit}
           handleOnChange={handleOnChange}
