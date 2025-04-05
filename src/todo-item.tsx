@@ -196,7 +196,7 @@ const TodoItemClass = styled.div`
 `
 
 const TodoInput = styled.input`
-  width: 50%;
+  width: 70%;
   height: 25px;
   border: none;
   outline: none;
