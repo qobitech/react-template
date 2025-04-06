@@ -2,8 +2,11 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNetworkStatus, useSync } from '../../hook'
 import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
-import SavedNoteItem from './note-app-item'
-import TodoItem, { ITodo } from './todo-item'
+import { ITodo } from './todo-item'
+import { ButtonComponent } from '../../components/button-component'
+import Todo from './todo'
+import SavedNotes from './saved-notes'
+import { DragDropContext, DropResult } from 'react-beautiful-dnd'
 
 export interface INote {
   id: string
@@ -96,11 +99,6 @@ const NotesApp = () => {
     if (textAreaRef?.current) textAreaRef.current.autofocus = true
   }, [])
 
-  const handleEditNote = useCallback((note: INote) => {
-    setNote(note)
-    if (textAreaRef?.current) textAreaRef.current.autofocus = true
-  }, [])
-
   /**
    * Handles user input with debouncing to prevent excessive API calls.
    * - Updates the note state immediately.
@@ -147,51 +145,41 @@ const NotesApp = () => {
     }
   }, [])
 
-  const handleClearAll = async () => {
-    await clearOfflineUpdates() // Clear them after successful sync
+  function swapValues<T>(arr: T[], index1: number, index2: number): T[] {
+    if (
+      index1 < 0 ||
+      index1 >= arr.length ||
+      index2 < 0 ||
+      index2 >= arr.length
+    ) {
+      throw new Error('Index out of bounds')
+    }
+
+    const newArr = [...arr] // Step 1
+    ;[newArr[index1], newArr[index2]] = [newArr[index2], newArr[index1]] // Step 2
+
+    return newArr // Step 3
   }
 
-  const onAddTodo = () => {
-    setNote((prev) => ({
-      ...prev,
-      todo: [
-        ...(prev?.todo || []),
-        { id: uuidv4(), subject: '', status: 'not-started' }
-      ]
-    }))
+  const onDragEnd = (result: DropResult) => {
+    const { destination, source } = result
+
+    if (!destination) return
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    )
+      return
+
+    setNote((prev) => {
+      const newTodos = swapValues(prev.todo, source.index, destination.index)
+      const updatedNote = { ...prev, todo: newTodos }
+
+      handleSaveNote('todo', updatedNote?.todo || [])
+      return updatedNote
+    })
   }
-
-  const onSaveTodo = useCallback(
-    async (todoItem: ITodo) => {
-      setNote((prevNote) => {
-        const modifiedTodo =
-          prevNote?.todo?.map((i) => (i.id === todoItem.id ? todoItem : i)) ||
-          []
-        const updatedNote = { ...prevNote, todo: modifiedTodo }
-
-        handleSaveNote('todo', updatedNote?.todo || [])
-
-        return updatedNote
-      })
-    },
-    [note]
-  )
-
-  const deleteTodo = useCallback(
-    async (id: string) => {
-      setNote((prevNote) => {
-        const updatedNote = {
-          ...prevNote,
-          todo: prevNote?.todo?.filter((i) => i.id !== id) || []
-        }
-
-        handleSaveNote('todo', updatedNote?.todo || [])
-
-        return updatedNote
-      })
-    },
-    [note]
-  )
 
   return (
     <ContainerClass>
@@ -234,25 +222,9 @@ const NotesApp = () => {
           autoFocus
         />
 
-        <TodoListContainerClass>
-          {note?.todo?.map((todo) => (
-            <TodoItem
-              todo={todo}
-              onSaveTodo={onSaveTodo}
-              deleteTodo={deleteTodo}
-              key={todo.id}
-            />
-          ))}
-        </TodoListContainerClass>
-
-        <UtilityContainerClass>
-          <ButtonComponent
-            onClick={onAddTodo}
-            disabled={!note.title && !note.text}
-          >
-            Add Todo list
-          </ButtonComponent>
-        </UtilityContainerClass>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Todo setNote={setNote} note={note} handleSaveNote={handleSaveNote} />
+        </DragDropContext>
 
         <button
           onClick={async () => {
@@ -264,42 +236,13 @@ const NotesApp = () => {
         </button>
       </NoteClass>
 
-      <SavedNoteClass>
-        <SavedNoteHeaderClass>
-          <h2>Saved Notes</h2>
-
-          {offlineData?.length ? (
-            <ButtonComponent
-              onClick={async () => {
-                await handleClearAll()
-              }}
-            >
-              Clear All
-            </ButtonComponent>
-          ) : null}
-        </SavedNoteHeaderClass>
-
-        {!offlineData?.length ? (
-          <p className="no-notes">No notes saved</p>
-        ) : (
-          <SavedNoteGridClass>
-            {offlineData
-              .sort((a, b) => b.timeStamp - a.timeStamp)
-              ?.map((n) => (
-                <SavedNoteItem
-                  key={n.id}
-                  note={n}
-                  onClick={() => {
-                    handleEditNote(n)
-                  }}
-                  onDelete={async () => {
-                    await removeOfflineItem(n.id)
-                  }}
-                />
-              ))}
-          </SavedNoteGridClass>
-        )}
-      </SavedNoteClass>
+      <SavedNotes
+        offlineData={offlineData}
+        removeOfflineItem={removeOfflineItem}
+        clearOfflineUpdates={clearOfflineUpdates}
+        setNote={setNote}
+        note={note}
+      />
     </ContainerClass>
   )
 }
@@ -344,44 +287,10 @@ const NoteClass = styled.div`
     border-radius: 5px;
   }
 `
-const SavedNoteClass = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin: auto;
-  width: 100%;
-  gap: 30px;
-  padding: 20px;
-  box-sizing: border-box;
-  border: 1px solid #eaeaea;
-  border-radius: 5px;
-  .no-notes {
-    font-size: 11px;
-    opacity: 0.7;
-  }
-`
-
-const SavedNoteHeaderClass = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  h2 {
-    font-size: 21px;
-    margin: 0;
-  }
-`
-
 const HeaderClass = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-`
-const SavedNoteGridClass = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(40%, 1fr));
-  gap: 19px;
-  @media (max-width: 1200px) {
-    grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
-  }
 `
 const StatusClass = styled.div`
   display: flex;
@@ -396,24 +305,4 @@ const StatusClass = styled.div`
       color: red;
     }
   }
-`
-const UtilityContainerClass = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 20px;
-`
-
-const TodoListContainerClass = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`
-
-const ButtonComponent = styled.button`
-  outline: none;
-  border: 1px solid #eaeaea;
-  cursor: pointer;
-  border-radius: 5px;
-  font-size: 12px;
-  padding: 2px 5px;
 `

@@ -1,9 +1,10 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-import DeleteClose from '../../components/delete-close'
+import DragClose from '../../components/drag-close'
 import InputText from '../../components/input-text'
 import SelectStatusText from '../../components/select-status-text'
-import EditSave from '../../components/edit-save'
+import EditSaveDelete from '../../components/edit-save-delete'
+import { Draggable } from 'react-beautiful-dnd'
 
 export type todoStatusType =
   | 'completed'
@@ -21,9 +22,10 @@ export interface ITodoItem {
   todo: ITodo
   onSaveTodo: (todo: ITodo) => Promise<void>
   deleteTodo: (id: string) => Promise<void>
+  index: number
 }
 
-const TodoItem: FC<ITodoItem> = ({ todo, onSaveTodo, deleteTodo }) => {
+const TodoItem: FC<ITodoItem> = ({ todo, onSaveTodo, deleteTodo, index }) => {
   const debounceTimeout = useRef<number | null>(null) // Reference to track debounce timing
   const wrapperRef = useRef<HTMLFormElement>(null)
 
@@ -85,31 +87,42 @@ const TodoItem: FC<ITodoItem> = ({ todo, onSaveTodo, deleteTodo }) => {
   }
 
   return (
-    <TodoItemWrapperClass>
-      <DeleteClose
-        isEdit={isEdit}
-        onDelete={async () => await deleteTodo(formData.id)}
-        onClose={async () => await onExitNote()}
-      />
-
-      <TodoItemClass ref={wrapperRef} onSubmit={onSave}>
-        <InputText
-          isEdit={isEdit}
-          handleOnChange={handleOnChange}
-          subject={formData.subject}
-        />
-
-        <TodoItemController>
-          <SelectStatusText
+    <Draggable draggableId={formData.id} index={index}>
+      {(provided) => (
+        <TodoItemWrapperClass
+          {...provided.draggableProps}
+          ref={provided.innerRef}
+        >
+          <DragClose
             isEdit={isEdit}
-            handleOnChange={handleOnChange}
-            status={formData.status}
+            dragHandleProps={provided.dragHandleProps}
+            onClose={async () => await onExitNote()}
           />
 
-          <EditSave isEdit={isEdit} onSave={onSave} />
-        </TodoItemController>
-      </TodoItemClass>
-    </TodoItemWrapperClass>
+          <TodoItemClass ref={wrapperRef} onSubmit={onSave}>
+            <InputText
+              isEdit={isEdit}
+              handleOnChange={handleOnChange}
+              subject={formData.subject}
+            />
+
+            <TodoItemController>
+              <SelectStatusText
+                isEdit={isEdit}
+                handleOnChange={handleOnChange}
+                status={formData.status}
+              />
+
+              <EditSaveDelete
+                isEdit={isEdit}
+                onSave={onSave}
+                onDelete={async () => await deleteTodo(formData.id)}
+              />
+            </TodoItemController>
+          </TodoItemClass>
+        </TodoItemWrapperClass>
+      )}
+    </Draggable>
   )
 }
 

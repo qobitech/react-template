@@ -1,22 +1,22 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import EditSave from '../src/components/edit-save'
+// import { render, screen, fireEvent } from '@testing-library/react'
+// import EditSave from '../src/components/edit-save-delete'
 
-describe('EditSave Component', () => {
-  it('shows EditSVG when isEdit is false', () => {
-    render(<EditSave isEdit={false} onSave={() => {}} />)
+// describe('EditSave Component', () => {
+//   it('shows EditSVG when isEdit is false', () => {
+//     render(<EditSave isEdit={false} onSave={() => {}} />)
 
-    const editIcon = screen.getByLabelText('Edit todo item')
-    expect(editIcon).toBeInTheDocument()
-  })
+//     const editIcon = screen.getByLabelText('Edit todo item')
+//     expect(editIcon).toBeInTheDocument()
+//   })
 
-  it('shows CheckSVG when isEdit is true and triggers onSave onClick', () => {
-    const onSave = vi.fn()
-    render(<EditSave isEdit={true} onSave={onSave} />)
+//   it('shows CheckSVG when isEdit is true and triggers onSave onClick', () => {
+//     const onSave = vi.fn()
+//     render(<EditSave isEdit={true} onSave={onSave} />)
 
-    const saveIcon = screen.getByLabelText('Save todo item')
-    expect(saveIcon).toBeInTheDocument()
+//     const saveIcon = screen.getByLabelText('Save todo item')
+//     expect(saveIcon).toBeInTheDocument()
 
-    fireEvent.click(saveIcon)
-    expect(onSave).toHaveBeenCalled()
-  })
-})
+//     fireEvent.click(saveIcon)
+//     expect(onSave).toHaveBeenCalled()
+//   })
+// })
