@@ -13,8 +13,8 @@ const DragClose: FC<IDragClose> = ({ isEdit, onClose, dragHandleProps }) => {
   return (
     <>
       {!isEdit ? (
-        <DragWrapperClass {...dragHandleProps}>
-          <DraggableSVG />
+        <DragWrapperClass {...dragHandleProps} aria-label="Re-order todo item">
+          <DraggableSVG aria-label="Draggable icon" />
         </DragWrapperClass>
       ) : (
         <CloseSVG

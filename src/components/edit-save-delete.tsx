@@ -22,9 +22,9 @@ const EditSaveDelete: FC<IEditSaveDelete> = ({ isEdit, onSave, onDelete }) => {
         <>
           <EditSVG aria-label="Edit todo item" />
           <TrashSVG
+            onClick={onDelete}
             aria-label="Delete todo item"
             focusable="true"
-            onClick={onDelete}
           />
         </>
       )}
