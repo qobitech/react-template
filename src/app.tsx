@@ -1,4 +1,4 @@
-import NotesApp from './note-app'
+import NotesApp from './pages/note-app'
 import './index.css'
 
 const App = () => {

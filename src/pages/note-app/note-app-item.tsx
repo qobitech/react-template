@@ -1,8 +1,8 @@
 import { FC } from 'react'
 import styled from 'styled-components'
 import moment from 'moment'
-import { INote } from './note-app'
-import { TrashSVG } from './svg-icons'
+import { INote } from '.'
+import { TrashSVG } from '../../svg-icons'
 
 interface ISavedNoteItem {
   note: INote

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useNetworkStatus, useSync } from './hook'
+import { useNetworkStatus, useSync } from '../../hook'
 import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
 import SavedNoteItem from './note-app-item'

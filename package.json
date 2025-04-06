@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "vitest --ui --coverage.enabled=true",
-    "coverage": "vitest run --coverage",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:coverage-ui": "vitest --ui --coverage.enabled=true",
     "preview": "vite preview",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "type-check": "tsc --noEmit"

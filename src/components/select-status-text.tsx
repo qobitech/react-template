@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import styled from 'styled-components'
-import { todoStatusType } from '../todo-item'
+import { todoStatusType } from '../pages/note-app/todo-item'
 
 interface ISelectStatusText {
   isEdit: boolean

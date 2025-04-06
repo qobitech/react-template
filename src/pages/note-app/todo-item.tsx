@@ -1,9 +1,9 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-import DeleteClose from './components/delete-close'
-import InputText from './components/input-text'
-import SelectStatusText from './components/select-status-text'
-import EditSave from './components/edit-save'
+import DeleteClose from '../../components/delete-close'
+import InputText from '../../components/input-text'
+import SelectStatusText from '../../components/select-status-text'
+import EditSave from '../../components/edit-save'
 
 export type todoStatusType =
   | 'completed'
@@ -73,7 +73,7 @@ const TodoItem: FC<ITodoItem> = ({ todo, onSaveTodo, deleteTodo }) => {
         await onSaveTodo(fd) // Save after delay
       }, 500)
     },
-    []
+    [formData]
   )
 
   const onExitNote = async () => {
