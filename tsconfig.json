@@ -17,6 +17,12 @@
     "jsx": "react-jsx",
     "types": ["vite/client", "vitest/globals"] // Add Jest types
   },
-  "include": [".d.ts", "**/*.ts", "**/*.tsx", "__tests__/*.test.tsx"],
+  "include": [
+    ".d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "__tests__/*.test.ts",
+    "__tests__/*.test.tsx"
+  ],
   "exclude": ["node_modules"]
 }

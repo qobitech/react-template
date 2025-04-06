@@ -3,7 +3,6 @@ import { useNetworkStatus, useSync } from '../../hook'
 import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
 import { ITodo } from './todo-item'
-import { ButtonComponent } from '../../components/button-component'
 import Todo from './todo'
 import SavedNotes from './saved-notes'
 import { DragDropContext, DropResult } from 'react-beautiful-dnd'
@@ -306,4 +305,12 @@ const StatusClass = styled.div`
       color: red;
     }
   }
+`
+export const ButtonComponent = styled.button`
+  outline: none;
+  border: 1px solid #eaeaea;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 12px;
+  padding: 2px 5px;
 `

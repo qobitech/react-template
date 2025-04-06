@@ -1,9 +1,8 @@
 import { FC, useCallback } from 'react'
 import TodoItem, { ITodo } from './todo-item'
 import { v4 as uuidv4 } from 'uuid'
-import { INote } from '.'
+import { ButtonComponent, INote } from '.'
 import styled from 'styled-components'
-import { ButtonComponent } from '../../components/button-component'
 import { Droppable } from 'react-beautiful-dnd'
 
 interface ITodoProps {

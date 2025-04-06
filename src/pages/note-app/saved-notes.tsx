@@ -1,7 +1,6 @@
 import styled from 'styled-components'
-import { ButtonComponent } from '../../components/button-component'
 import SavedNoteItem from './note-app-item'
-import { INote } from '.'
+import { INote, ButtonComponent } from '.'
 import { FC, useCallback } from 'react'
 
 interface ISavedNotesProps {
