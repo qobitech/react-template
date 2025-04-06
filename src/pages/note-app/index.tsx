@@ -243,6 +243,21 @@ const NotesApp = () => {
         setNote={setNote}
         note={note}
       />
+      <FooterClass>
+        <p>
+          Developed by:{' '}
+          <a
+            href="https://www.linkedin.com/in/frank-aiywa-kobi/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Franklyn Aiywa Edekobi
+          </a>
+        </p>
+        <p className="copy-right">
+          © {new Date().getFullYear()}. All rights reserved.
+        </p>
+      </FooterClass>
     </ContainerClass>
   )
 }
@@ -257,6 +272,7 @@ const ContainerClass = styled.div`
   width: 95%;
   gap: 30px;
   padding: 30px 0;
+  min-height: 100vh;
 `
 const NoteClass = styled.div`
   display: flex;
@@ -313,4 +329,26 @@ export const ButtonComponent = styled.button`
   border-radius: 5px;
   font-size: 12px;
   padding: 2px 5px;
+`
+
+const FooterClass = styled.footer`
+  margin-top: auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  p {
+    margin: 0;
+    font-size: 12px;
+  }
+  a {
+    text-decoration: underline;
+    cursor: pointer;
+    color: #000;
+  }
+  .copy-right {
+    font-size: 10px;
+  }
 `
