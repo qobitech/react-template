@@ -145,20 +145,21 @@ const NotesApp = () => {
     }
   }, [])
 
-  function swapValues<T>(arr: T[], index1: number, index2: number): T[] {
+  function moveAndShift<T>(arr: T[], fromIndex: number, toIndex: number): T[] {
     if (
-      index1 < 0 ||
-      index1 >= arr.length ||
-      index2 < 0 ||
-      index2 >= arr.length
+      fromIndex < 0 ||
+      fromIndex >= arr.length ||
+      toIndex < 0 ||
+      toIndex > arr.length
     ) {
       throw new Error('Index out of bounds')
     }
 
-    const newArr = [...arr] // Step 1
-    ;[newArr[index1], newArr[index2]] = [newArr[index2], newArr[index1]] // Step 2
+    const newArr = [...arr]
+    const [item] = newArr.splice(fromIndex, 1) // Remove item from its original spot
+    newArr.splice(toIndex, 0, item) // Insert it into the new spot
 
-    return newArr // Step 3
+    return newArr
   }
 
   const onDragEnd = (result: DropResult) => {
@@ -173,7 +174,7 @@ const NotesApp = () => {
       return
 
     setNote((prev) => {
-      const newTodos = swapValues(prev.todo, source.index, destination.index)
+      const newTodos = moveAndShift(prev.todo, source.index, destination.index)
       const updatedNote = { ...prev, todo: newTodos }
 
       handleSaveNote('todo', updatedNote?.todo || [])
