@@ -32,7 +32,7 @@ const SavedNotes: FC<ISavedNotesProps> = ({
   return (
     <SavedNoteClass>
       <SavedNoteHeaderClass>
-        <h2>Saved Notes</h2>
+        <h2>Saved Todos</h2>
 
         {offlineData?.length ? (
           <ButtonComponent

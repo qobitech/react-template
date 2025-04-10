@@ -193,14 +193,14 @@ const NotesApp = () => {
 
       <NoteClass>
         <HeaderClass>
-          <h1>Note App</h1>
+          <h1>A Personal Todo List App</h1>
 
           <ButtonComponent
             onClick={() => {
               handleNewNote()
             }}
           >
-            New Note +
+            New Todo +
           </ButtonComponent>
         </HeaderClass>
 
@@ -215,7 +215,7 @@ const NotesApp = () => {
         <textarea
           value={note.text}
           onChange={handleDebouncedSaveNote}
-          placeholder="Write a note..."
+          placeholder="Description"
           className="text-area"
           ref={textAreaRef}
           id="text"
@@ -232,7 +232,7 @@ const NotesApp = () => {
           }}
           className="btn"
         >
-          Save Note
+          Save Todo List
         </button>
       </NoteClass>
 
@@ -330,7 +330,6 @@ export const ButtonComponent = styled.button`
   font-size: 12px;
   padding: 2px 5px;
 `
-
 const FooterClass = styled.footer`
   margin-top: auto;
   text-align: center;

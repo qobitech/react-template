@@ -64,6 +64,11 @@ const Todo: FC<ITodoProps> = ({ setNote, note, handleSaveNote }) => {
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
+            <TodoListHeaderClass>
+              <p>
+                Todo Items &nbsp;&nbsp;<span>( {note.todo.length} )</span>
+              </p>
+            </TodoListHeaderClass>
             {note?.todo?.map((todo, index) => (
               <TodoItem
                 todo={todo}
@@ -82,7 +87,7 @@ const Todo: FC<ITodoProps> = ({ setNote, note, handleSaveNote }) => {
           onClick={onAddTodo}
           disabled={!note.title && !note.text}
         >
-          Add Todo list
+          Add Todo Item
         </ButtonComponent>
       </UtilityContainerClass>
     </>
@@ -101,4 +106,17 @@ const UtilityContainerClass = styled.div`
   display: flex;
   align-items: center;
   gap: 20px;
+`
+
+const TodoListHeaderClass = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  p {
+    font-size: 13px;
+    font-weight: bold;
+  }
+  span {
+    font-weight: 400;
+  }
 `
