@@ -1,6 +1,8 @@
 import { createSHA256 } from '../src/helper'
 
-// add comment
+// Polyfill for `crypto.subtle.digest` in Node test environment.
+// `crypto.subtle` is available in browsers and secure contexts only,
+// so we mock it using Node's `crypto.createHash` to ensure SHA-256 hashing works in Vitest.
 beforeAll(() => {
   global.crypto = {
     subtle: {

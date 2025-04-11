@@ -2,8 +2,9 @@ import styled from 'styled-components'
 import SavedNoteItem from './note-app-item'
 import { INote, ButtonComponent } from '.'
 import { FC, useCallback } from 'react'
+import { ExportSVG, ImportSVG, SearchSVG } from '../../svg-icons'
 
-interface ISavedNotesProps {
+interface ISavedTodosProps {
   offlineData: INote[] | undefined
   removeOfflineItem: (id: string) => Promise<void>
   clearOfflineUpdates: () => Promise<void>
@@ -11,7 +12,7 @@ interface ISavedNotesProps {
   note: INote
 }
 
-const SavedNotes: FC<ISavedNotesProps> = ({
+const SavedTodos: FC<ISavedTodosProps> = ({
   offlineData,
   removeOfflineItem,
   clearOfflineUpdates,
@@ -34,15 +35,35 @@ const SavedNotes: FC<ISavedNotesProps> = ({
       <SavedNoteHeaderClass>
         <h2>Saved Todos</h2>
 
-        {offlineData?.length ? (
-          <ButtonComponent
-            onClick={async () => {
-              await handleClearAll()
-            }}
-          >
-            Clear All
-          </ButtonComponent>
-        ) : null}
+        <HeaderRightClass>
+          <SearchSVG
+            title="Search todo"
+            aria-label="Search todo files"
+            focusable="true"
+          />
+
+          <ImportSVG
+            title="Import todo"
+            aria-label="Import todo files"
+            focusable="true"
+          />
+
+          <ExportSVG
+            title="Export todo"
+            aria-label="Export todo files"
+            focusable="true"
+          />
+
+          {offlineData?.length ? (
+            <ButtonComponent
+              onClick={async () => {
+                await handleClearAll()
+              }}
+            >
+              Clear All
+            </ButtonComponent>
+          ) : null}
+        </HeaderRightClass>
       </SavedNoteHeaderClass>
 
       {!offlineData?.length ? (
@@ -69,7 +90,7 @@ const SavedNotes: FC<ISavedNotesProps> = ({
   )
 }
 
-export default SavedNotes
+export default SavedTodos
 
 const SavedNoteClass = styled.div`
   display: flex;
@@ -99,9 +120,15 @@ const SavedNoteGridClass = styled.div`
 const SavedNoteHeaderClass = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
   h2 {
     font-size: 21px;
     margin: 0;
   }
+`
+
+const HeaderRightClass = styled.div`
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 27px;
 `

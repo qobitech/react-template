@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
 import { ITodo } from './todo-item'
 import Todo from './todo'
-import SavedNotes from './saved-notes'
+import SavedTodos from './saved-todos'
 import { DragDropContext, DropResult } from 'react-beautiful-dnd'
 
 export interface INote {
@@ -191,9 +191,9 @@ const NotesApp = () => {
         <p className="status-sync">{syncInProgress ? 'Syncing...' : ''}</p>
       </StatusClass>
 
-      <NoteClass>
+      <TodoClass>
         <HeaderClass>
-          <h1>A Personal Todo List App</h1>
+          <h1>Todos</h1>
 
           <ButtonComponent
             onClick={() => {
@@ -203,6 +203,7 @@ const NotesApp = () => {
             New Todo +
           </ButtonComponent>
         </HeaderClass>
+        <DescriptionClass>A Personal Todo List App</DescriptionClass>
 
         <input
           value={note.title}
@@ -234,9 +235,9 @@ const NotesApp = () => {
         >
           Save Todo List
         </button>
-      </NoteClass>
+      </TodoClass>
 
-      <SavedNotes
+      <SavedTodos
         offlineData={offlineData}
         removeOfflineItem={removeOfflineItem}
         clearOfflineUpdates={clearOfflineUpdates}
@@ -251,7 +252,7 @@ const NotesApp = () => {
             target="_blank"
             rel="noreferrer"
           >
-            Franklyn Aiywa Edekobi
+            Me
           </a>
         </p>
         <p className="copy-right">
@@ -274,7 +275,7 @@ const ContainerClass = styled.div`
   padding: 30px 0;
   min-height: 100vh;
 `
-const NoteClass = styled.div`
+const TodoClass = styled.div`
   display: flex;
   flex-direction: column;
   margin: auto;
@@ -350,4 +351,9 @@ const FooterClass = styled.footer`
   .copy-right {
     font-size: 10px;
   }
+`
+
+const DescriptionClass = styled.p`
+  margin: 0;
+  font-size: 12px;
 `
