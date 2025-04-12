@@ -326,6 +326,9 @@ export const ButtonComponent = styled.button`
   align-items: center;
   justify-content: center;
   gap: 6px;
+  @media (max-width: 1200px) {
+    font-size: 16px;
+  }
 `
 
 export const ButtonCancelComponent = styled.button`
@@ -337,6 +340,9 @@ export const ButtonCancelComponent = styled.button`
   border-radius: 5px;
   font-size: 12px;
   padding: 2px 5px;
+  @media (max-width: 1200px) {
+    font-size: 16px;
+  }
 `
 
 const FooterClass = styled.footer`
