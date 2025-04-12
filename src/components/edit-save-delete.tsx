@@ -45,4 +45,9 @@ const EditSaveWrapper = styled.div`
     fill: green;
     color: green;
   }
+  @media (max-width: 1200px) {
+    svg {
+      height: 16px;
+    }
+  }
 `

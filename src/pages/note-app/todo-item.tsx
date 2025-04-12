@@ -126,6 +126,11 @@ const TodoItemWrapperClass = styled.div`
   border-bottom: 1px solid #eaeaea;
   flex-shrink: 0;
   width: 100%;
+  @media (max-width: 1200px) {
+    svg {
+      height: 16px;
+    }
+  }
 `
 
 const TodoItemClass = styled.form`
