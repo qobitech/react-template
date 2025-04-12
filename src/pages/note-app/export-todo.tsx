@@ -183,6 +183,7 @@ const SearchSection = styled.div`
     border: none;
     outline: none;
     font-size: 12px;
+    background: none;
     @media (max-width: 1200px) {
       font-size: 16px;
     }
