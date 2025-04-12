@@ -49,5 +49,10 @@ const TodoText = styled.p`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  width: 50%;
+  width: 100%;
+  max-width: 350px;
+  @media (max-width: 1200px) {
+    font-size: 16px;
+    max-width: 150px;
+  }
 `
