@@ -1,13 +1,20 @@
 import { renderHook } from '@testing-library/react'
 import { useIO } from '../src/hook'
-import { INote } from '../src/pages/note-app'
+import * as helperFunctions from '../src/utils'
+import { ITodos } from '../src/interface'
 
 // Mock all the utility functions used in the hook
+vi.mock('../src/utils.ts', () => ({
+  convertFileToTodo: vi.fn(),
+  exportTodos: vi.fn()
+}))
+
 vi.mock('../src/helper', () => ({
   generateUserFingerprint: vi
     .fn()
     .mockResolvedValue('fakehash-user-fingerprint'),
   generateUUID: vi.fn().mockReturnValue('mock-uuid-123'),
+  sanitizeFileName: vi.fn().mockReturnValue('Test_Todo_1'),
   generateVisualHash: vi.fn().mockReturnValue('mock-visual-hash'),
   createSHA256: vi.fn().mockImplementation(async (data) => 'mock-sha256-hash'),
   compressWithPako: vi
@@ -23,11 +30,20 @@ vi.mock('../src/helper', () => ({
 }))
 
 // Create a mock for document.createElement
-const mockLink = {
-  href: '',
-  download: '',
-  click: vi.fn()
-}
+// const mockLink = {
+//   href: '',
+//   download: '',
+//   click: vi.fn()
+// }
+const aTagElement = document.createElement
+
+const mockLink = document.createElement('a')
+mockLink.click = vi.fn()
+
+vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+  if (tagName === 'a') return mockLink
+  return aTagElement.call(document, tagName)
+})
 
 // Mock URL and document APIs
 global.URL = {
@@ -45,9 +61,29 @@ vi.spyOn(document, 'createElement').mockImplementation((tag) => {
 })
 
 describe('useIO Hook', () => {
-  const mockTodos: INote[] = [
-    { id: '1', title: 'Test Todo 1', text: 'sample', timeStamp: 100, todo: [] },
-    { id: '2', title: 'Test Todo 2', text: 'sample2', timeStamp: 200, todo: [] }
+  const mockTodo: ITodos = {
+    id: '1',
+    title: 'Test Todo 1',
+    text: 'sample',
+    timeStamp: 100,
+    todo: []
+  }
+
+  const mockTodos: ITodos[] = [
+    {
+      id: '1',
+      title: 'Todo A',
+      text: 'Task A',
+      timeStamp: 1,
+      todo: []
+    },
+    {
+      id: '2',
+      title: 'Todo B',
+      text: 'Task B',
+      timeStamp: 2,
+      todo: []
+    }
   ]
 
   beforeEach(() => {
@@ -58,124 +94,132 @@ describe('useIO Hook', () => {
     it('creates a blob and triggers a download', async () => {
       const { result } = renderHook(() => useIO())
 
-      await result.current.exportTodosToFile(mockTodos)
+      await result.current.exportTodoToFile(mockTodo)
 
       // Verify URL and link manipulation
       expect(global.URL.createObjectURL).toHaveBeenCalledTimes(1)
       expect(mockLink.click).toHaveBeenCalledTimes(1)
-      expect(mockLink.download).toMatch(/myTodos_\d+\.todolistx/)
+      expect(mockLink.download).toMatch(/Test_Todo_1_\d+\.todolistx/)
       expect(global.URL.revokeObjectURL).toHaveBeenCalledTimes(1)
     })
   })
 
-  describe('importTodosFromFile', () => {
-    it('successfully imports todos from a valid file', async () => {
-      // Mock createSHA256 to return a predictable value for header verification
-      const { createSHA256 } = await import('../src/helper')
-      const mockHeaderChecksum = '0123456789abcdef0123456789abcdef' // 32 hex chars for SHA-256
-      ;(createSHA256 as any).mockImplementation(async (data: any) => {
-        // For header verification
-        if (data instanceof Uint8Array && data.length === 24) {
-          return mockHeaderChecksum
-        }
-        // For other checksum verifications
-        return 'mock-sha256-hash'
-      })
-
-      // Mock the readFileAsArrayBuffer to return a valid file structure
-      const mockArrayBuffer = new ArrayBuffer(100)
-      const view = new DataView(mockArrayBuffer)
-
-      // Set magic number "TDOX"
-      view.setUint8(0, 0x54) // T
-      view.setUint8(1, 0x44) // D
-      view.setUint8(2, 0x4f) // O
-      view.setUint8(3, 0x58) // X
-
-      // Set version to 1
-      view.setUint16(4, 1, true)
-
-      // Set content length
-      view.setUint32(8, 50, true)
-
-      // Set the header checksum to match what our mocked createSHA256 will return
-      for (let i = 0; i < 8; i++) {
-        view.setUint8(
-          24 + i,
-          parseInt(mockHeaderChecksum.substring(i * 2, i * 2 + 2), 16)
-        )
-      }
-
+  describe('importTodoFromFile', () => {
+    it('successfully imports todo from a valid file as todo', async () => {
       // Mock the import sequence
-      const { readFileAsArrayBuffer, decodeData, decompressWithPako } =
-        await import('../src/helper')
-      ;(readFileAsArrayBuffer as any).mockResolvedValue(mockArrayBuffer)
-      ;(decodeData as any).mockReturnValue(new Uint8Array([10, 20, 30]))
-      ;(decompressWithPako as any).mockReturnValue(
-        JSON.stringify({
-          formatSignature: 'MYTODO_FORMAT_V1',
-          metadata: {
-            contentChecksum: 'mock-sha256-hash',
-            version: '1.0'
-          },
-          todos: mockTodos
-        })
-      )
-
       const { result } = renderHook(() => useIO())
       const mockFile = new File([], 'test.todolistx')
 
-      const importedTodos = await result.current.importTodosFromFile(mockFile)
+      const { convertFileToTodo } = helperFunctions
 
-      expect(importedTodos).toEqual(mockTodos)
-      expect(readFileAsArrayBuffer).toHaveBeenCalledWith(mockFile)
+      ;(convertFileToTodo as any).mockResolvedValue({ todo: mockTodo })
+
+      const { todo } = await result.current.importTodoFromFile(mockFile)
+
+      expect(todo).toEqual(mockTodo)
+      expect(convertFileToTodo).toHaveBeenCalledWith(mockFile)
+    })
+  })
+
+  describe('exportMultipleTodosAsZip', () => {
+    it('exports multiple todos to a zip file and triggers download', async () => {
+      const { result } = renderHook(() => useIO())
+
+      const createObjectURLSpy = vi.spyOn(global.URL, 'createObjectURL')
+      const revokeObjectURLSpy = vi.spyOn(global.URL, 'revokeObjectURL')
+      const appendChildSpy = vi.spyOn(document.body, 'appendChild')
+      const removeChildSpy = vi.spyOn(document.body, 'removeChild')
+
+      await result.current.exportMultipleTodosAsZip(mockTodos)
+
+      expect(createObjectURLSpy).toHaveBeenCalledTimes(1)
+      expect(mockLink.click).toHaveBeenCalledTimes(1)
+      expect(mockLink.download).toMatch(/myTodoLists_\d+\.zip/)
+      expect(revokeObjectURLSpy).toHaveBeenCalledTimes(1)
+      expect(appendChildSpy).toHaveBeenCalled()
+      expect(removeChildSpy).toHaveBeenCalled()
+    })
+  })
+
+  describe('importMultipleTodosFromFile', () => {
+    it('imports multiple valid todo files', async () => {
+      const { result } = renderHook(() => useIO())
+
+      const { convertFileToTodo } = helperFunctions
+
+      ;(convertFileToTodo as any)
+        .mockResolvedValueOnce({ todo: mockTodos[0] })
+        .mockResolvedValueOnce({ todo: mockTodos[1] })
+
+      const mockFileA = new File([], 'Todo_A.todolistx')
+      const mockFileB = new File([], 'Todo_B.todolistx')
+
+      const { todos } = await result.current.importMultipleTodosFromFile([
+        mockFileA,
+        mockFileB
+      ])
+
+      expect(todos).toEqual(mockTodos)
+      expect(convertFileToTodo).toHaveBeenCalledTimes(2)
+      expect(convertFileToTodo).toHaveBeenCalledWith(mockFileA)
+      expect(convertFileToTodo).toHaveBeenCalledWith(mockFileB)
     })
 
-    it('throws an error for invalid file format', async () => {
-      // Mock an invalid file (wrong magic number)
-      const mockArrayBuffer = new ArrayBuffer(100)
-      const view = new DataView(mockArrayBuffer)
-
-      // Set wrong magic number
-      view.setUint8(0, 0x58) // X
-      view.setUint8(1, 0x58) // X
-      view.setUint8(2, 0x58) // X
-      view.setUint8(3, 0x58) // X
-
-      const { readFileAsArrayBuffer } = await import('../src/helper')
-      ;(readFileAsArrayBuffer as any).mockResolvedValue(mockArrayBuffer)
-
+    it('continues importing even if one file fails', async () => {
       const { result } = renderHook(() => useIO())
-      const mockFile = new File([], 'invalid.todolistx')
 
-      await expect(
-        result.current.importTodosFromFile(mockFile)
-      ).rejects.toThrow('Invalid file format: not a todo file')
+      const file1 = new File([], 'valid.todolistx')
+      const file2 = new File([], 'broken.todolistx')
+      const file3 = new File([], 'valid2.todolistx')
+
+      const { convertFileToTodo } = helperFunctions
+
+      ;(convertFileToTodo as any)
+        .mockResolvedValueOnce({
+          todo: { id: '1', title: 'Ok', text: '', timeStamp: 0, todo: [] }
+        })
+        .mockRejectedValueOnce(new Error('Bad file'))
+        .mockResolvedValueOnce({
+          todo: { id: '1', title: 'Ok', text: '', timeStamp: 0, todo: [] }
+        })
+
+      const { todos } = await result.current.importMultipleTodosFromFile([
+        file1,
+        file2,
+        file3
+      ])
+
+      expect(todos.length).toBe(2)
+      expect(todos[0].title).toBe('Ok')
     })
 
-    it('throws an error for unsupported version', async () => {
-      // Mock a file with unsupported version
-      const mockArrayBuffer = new ArrayBuffer(100)
-      const view = new DataView(mockArrayBuffer)
-
-      // Set magic number "TDOX"
-      view.setUint8(0, 0x54) // T
-      view.setUint8(1, 0x44) // D
-      view.setUint8(2, 0x4f) // O
-      view.setUint8(3, 0x58) // X
-
-      // Set version to 2 (unsupported)
-      view.setUint16(4, 2, true)
-
-      const { readFileAsArrayBuffer } = await import('../src/helper')
-      ;(readFileAsArrayBuffer as any).mockResolvedValue(mockArrayBuffer)
-
+    it('generates a report for a failed import', async () => {
       const { result } = renderHook(() => useIO())
-      const mockFile = new File([], 'unsupported.todolistx')
 
-      await expect(
-        result.current.importTodosFromFile(mockFile)
-      ).rejects.toThrow('Unsupported file version: 2')
+      const file1 = new File([], 'valid.todolistx')
+      const file2 = new File([], 'broken.todolistx')
+      const file3 = new File([], 'valid2.todolistx')
+
+      const { convertFileToTodo } = helperFunctions
+
+      ;(convertFileToTodo as any)
+        .mockResolvedValueOnce({
+          todo: { id: '1', title: 'Ok', text: '', timeStamp: 0, todo: [] }
+        })
+        .mockRejectedValueOnce(new Error('Bad file'))
+        .mockResolvedValueOnce({
+          todo: { id: '1', title: 'Ok', text: '', timeStamp: 0, todo: [] }
+        })
+
+      const { reports } = await result.current.importMultipleTodosFromFile([
+        file1,
+        file2,
+        file3
+      ])
+
+      expect(reports.length).toBe(1)
+      expect(reports[0].filename).toBe('broken.todolistx')
+      expect(reports[0].error).toBe('Bad file')
     })
   })
 })

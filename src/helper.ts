@@ -194,3 +194,11 @@ export function decodeData(encoded: Uint8Array): string {
   const decoder = new TextDecoder()
   return decoder.decode(decoded)
 }
+
+export function sanitizeFileName(name: string): string {
+  // Replace invalid filename characters with underscores
+  return name
+    .replace(/[\\/:*?"<>|]/g, '_') // Replace Windows/Unix invalid chars
+    .replace(/\s+/g, '_') // Replace spaces with underscores
+    .trim()
+}

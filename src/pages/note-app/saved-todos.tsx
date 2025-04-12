@@ -1,15 +1,19 @@
 import styled from 'styled-components'
 import SavedNoteItem from './note-app-item'
-import { INote, ButtonComponent } from '.'
+import { ButtonComponent } from '.'
 import { FC, useCallback } from 'react'
 import { ExportSVG, ImportSVG, SearchSVG } from '../../svg-icons'
+import Modal, { useModal } from '../../components/modal'
+import ExportTodo from './export-todo'
+import ImportTodo from './import-todo'
+import { ITodos } from '../../interface'
 
 interface ISavedTodosProps {
-  offlineData: INote[] | undefined
+  offlineData: ITodos[] | undefined
   removeOfflineItem: (id: string) => Promise<void>
   clearOfflineUpdates: () => Promise<void>
-  setNote: React.Dispatch<React.SetStateAction<INote>>
-  note: INote
+  setNote: React.Dispatch<React.SetStateAction<ITodos>>
+  note: ITodos
 }
 
 const SavedTodos: FC<ISavedTodosProps> = ({
@@ -24,69 +28,84 @@ const SavedTodos: FC<ISavedTodosProps> = ({
   }
 
   const handleEditNote = useCallback(
-    (note: INote) => {
+    (note: ITodos) => {
       setNote(note)
     },
     [note]
   )
 
+  const exportTodoProps = useModal()
+  const importTodoProps = useModal()
+
   return (
-    <SavedNoteClass>
-      <SavedNoteHeaderClass>
-        <h2>Saved Todos</h2>
+    <>
+      <Modal modalProps={exportTodoProps} title="Export Todos">
+        <ExportTodo todos={offlineData} onCancel={exportTodoProps.closeModal} />
+      </Modal>
 
-        <HeaderRightClass>
-          <SearchSVG
-            title="Search todo"
-            aria-label="Search todo files"
-            focusable="true"
-          />
+      <Modal modalProps={importTodoProps} title="Import Todos">
+        <ImportTodo />
+      </Modal>
 
-          <ImportSVG
-            title="Import todo"
-            aria-label="Import todo files"
-            focusable="true"
-          />
+      <SavedNoteClass>
+        <SavedNoteHeaderClass>
+          <h2>Saved Todos</h2>
 
-          <ExportSVG
-            title="Export todo"
-            aria-label="Export todo files"
-            focusable="true"
-          />
+          <HeaderRightClass>
+            <SearchSVG
+              title="Search todo"
+              aria-label="Search todo files"
+              focusable="true"
+            />
 
-          {offlineData?.length ? (
-            <ButtonComponent
-              onClick={async () => {
-                await handleClearAll()
-              }}
-            >
-              Clear All
-            </ButtonComponent>
-          ) : null}
-        </HeaderRightClass>
-      </SavedNoteHeaderClass>
+            <ImportSVG
+              title="Import todo"
+              aria-label="Import todo files"
+              focusable="true"
+              onClick={() => importTodoProps.openModal()}
+            />
 
-      {!offlineData?.length ? (
-        <p className="no-notes">No notes saved</p>
-      ) : (
-        <SavedNoteGridClass>
-          {offlineData
-            .sort((a, b) => b.timeStamp - a.timeStamp)
-            ?.map((n) => (
-              <SavedNoteItem
-                key={n.id}
-                note={n}
-                onClick={() => {
-                  handleEditNote(n)
+            <ExportSVG
+              title="Export todo"
+              aria-label="Export todo files"
+              focusable="true"
+              onClick={() => exportTodoProps.openModal()}
+            />
+
+            {offlineData?.length ? (
+              <ButtonComponent
+                onClick={async () => {
+                  await handleClearAll()
                 }}
-                onDelete={async () => {
-                  await removeOfflineItem(n.id)
-                }}
-              />
-            ))}
-        </SavedNoteGridClass>
-      )}
-    </SavedNoteClass>
+              >
+                Clear All
+              </ButtonComponent>
+            ) : null}
+          </HeaderRightClass>
+        </SavedNoteHeaderClass>
+
+        {!offlineData?.length ? (
+          <p className="no-notes">No notes saved</p>
+        ) : (
+          <SavedNoteGridClass>
+            {offlineData
+              .sort((a, b) => b.timeStamp - a.timeStamp)
+              ?.map((n) => (
+                <SavedNoteItem
+                  key={n.id}
+                  note={n}
+                  onClick={() => {
+                    handleEditNote(n)
+                  }}
+                  onDelete={async () => {
+                    await removeOfflineItem(n.id)
+                  }}
+                />
+              ))}
+          </SavedNoteGridClass>
+        )}
+      </SavedNoteClass>
+    </>
   )
 }
 

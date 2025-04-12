@@ -2,20 +2,12 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNetworkStatus, useSync } from '../../hook'
 import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
-import { ITodo } from './todo-item'
 import Todo from './todo'
 import SavedTodos from './saved-todos'
 import { DragDropContext, DropResult } from 'react-beautiful-dnd'
+import { ITodos } from '../../interface'
 
-export interface INote {
-  id: string
-  text: string
-  title: string
-  timeStamp: number
-  todo: ITodo[]
-}
-
-const defaultNote: Omit<INote, 'id'> = {
+const defaultNote: Omit<ITodos, 'id'> = {
   text: '',
   title: '',
   timeStamp: Date.now(),
@@ -23,7 +15,7 @@ const defaultNote: Omit<INote, 'id'> = {
 }
 
 const NotesApp = () => {
-  const [note, setNote] = useState<INote>({ ...defaultNote, id: uuidv4() }) // Stores the current note being typed
+  const [note, setNote] = useState<ITodos>({ ...defaultNote, id: uuidv4() }) // Stores the current note being typed
   const [syncInProgress, setSyncInProgress] = useState<boolean>(false) // Stores the list of saved notes
 
   const debounceTimeout = useRef<number | null>(null) // Reference to track debounce timing
@@ -37,13 +29,13 @@ const NotesApp = () => {
     clearOfflineUpdates,
     offlineData,
     removeOfflineItem
-  } = useSync<INote>() // Custom hook to manage offline storage
+  } = useSync<ITodos>() // Custom hook to manage offline storage
 
   /**
    * Saves a note to the server.
    * If the request fails, the error is thrown so it can be handled properly.
    */
-  const saveNote = async (note: INote) => {
+  const saveNote = async (note: ITodos) => {
     setSyncInProgress(true)
     try {
       await fetch('/api/notes', {
@@ -69,9 +61,9 @@ const NotesApp = () => {
    * - If online, it tries to save the note to the server.
    * - If the request fails, or if offline, it saves the note locally.
    */
-  const handleSaveNote = async <K extends keyof INote>(
+  const handleSaveNote = async <K extends keyof ITodos>(
     id: K,
-    value: INote[K]
+    value: ITodos[K]
   ) => {
     if (!value) return // Prevent saving empty notes
 
@@ -112,7 +104,7 @@ const NotesApp = () => {
     }
 
     debounceTimeout.current = window.setTimeout(async () => {
-      await handleSaveNote(e.target.id as keyof INote, e.target.value) // Save after delay
+      await handleSaveNote(e.target.id as keyof ITodos, e.target.value) // Save after delay
     }, 500)
   }
 
@@ -330,7 +322,23 @@ export const ButtonComponent = styled.button`
   border-radius: 5px;
   font-size: 12px;
   padding: 2px 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 `
+
+export const ButtonCancelComponent = styled.button`
+  outline: none;
+  border: 1px solid rgb(255, 249, 249);
+  background: rgb(255, 249, 249);
+  color: rgb(255, 153, 153);
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 12px;
+  padding: 2px 5px;
+`
+
 const FooterClass = styled.footer`
   margin-top: auto;
   text-align: center;

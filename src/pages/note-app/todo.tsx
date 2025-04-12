@@ -1,16 +1,17 @@
 import { FC, useCallback } from 'react'
-import TodoItem, { ITodo } from './todo-item'
+import TodoItem from './todo-item'
 import { v4 as uuidv4 } from 'uuid'
-import { ButtonComponent, INote } from '.'
+import { ButtonComponent } from '.'
 import styled from 'styled-components'
 import { Droppable } from 'react-beautiful-dnd'
+import { ITodo, ITodos } from '../../interface'
 
 interface ITodoProps {
-  setNote: (value: React.SetStateAction<INote>) => void
-  note: INote
-  handleSaveNote: <K extends keyof INote>(
+  setNote: (value: React.SetStateAction<ITodos>) => void
+  note: ITodos
+  handleSaveNote: <K extends keyof ITodos>(
     id: K,
-    value: INote[K]
+    value: ITodos[K]
   ) => Promise<void>
 }
 

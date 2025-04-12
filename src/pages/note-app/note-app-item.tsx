@@ -1,11 +1,11 @@
 import { FC } from 'react'
 import styled from 'styled-components'
 import moment from 'moment'
-import { INote } from '.'
 import { TrashSVG } from '../../svg-icons'
+import { ITodos } from '../../interface'
 
 interface ISavedNoteItem {
-  note: INote
+  note: ITodos
   onClick?: React.MouseEventHandler<HTMLDivElement> | undefined
   onDelete: () => void
 }

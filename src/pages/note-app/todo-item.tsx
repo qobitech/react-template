@@ -5,18 +5,7 @@ import InputText from '../../components/input-text'
 import SelectStatusText from '../../components/select-status-text'
 import EditSaveDelete from '../../components/edit-save-delete'
 import { Draggable } from 'react-beautiful-dnd'
-
-export type todoStatusType =
-  | 'completed'
-  | 'not-started'
-  | 'in-progress'
-  | 'blocked'
-
-export interface ITodo {
-  id: string
-  subject: string
-  status: todoStatusType
-}
+import { ITodo } from '../../interface'
 
 export interface ITodoItem {
   todo: ITodo
