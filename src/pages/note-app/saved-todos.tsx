@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import SavedNoteItem from './note-app-item'
 import { ButtonComponent } from '.'
 import { FC, useCallback } from 'react'
-import { ExportSVG, ImportSVG, SearchSVG } from '../../svg-icons'
+import { ExportSVG, ImportSVG } from '../../svg-icons'
 import Modal, { useModal } from '../../components/modal'
 import ExportTodo from './export-todo'
 import ImportTodo from './import-todo'
@@ -44,7 +44,7 @@ const SavedTodos: FC<ISavedTodosProps> = ({
       </Modal>
 
       <Modal modalProps={importTodoProps} title="Import Todos">
-        <ImportTodo />
+        <ImportTodo onClose={importTodoProps.closeModal} />
       </Modal>
 
       <SavedNoteClass>
@@ -52,12 +52,6 @@ const SavedTodos: FC<ISavedTodosProps> = ({
           <h2>Saved Todos</h2>
 
           <HeaderRightClass>
-            <SearchSVG
-              title="Search todo"
-              aria-label="Search todo files"
-              focusable="true"
-            />
-
             <ImportSVG
               title="Import todo"
               aria-label="Import todo files"

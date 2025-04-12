@@ -11,6 +11,8 @@ interface IExportTodo {
 }
 
 const ExportTodo: FC<IExportTodo> = ({ todos, onCancel }) => {
+  const useIOProps = useIO()
+
   const [searchValue, setSearchValue] = useState<string>('')
   const [selectedFiles, setSelectedFiles] = useState<ITodos[]>([])
 
@@ -42,8 +44,6 @@ const ExportTodo: FC<IExportTodo> = ({ todos, onCancel }) => {
 
   const isSelectAll = filteredTodos.length === selectedFiles.length
 
-  const useIOProps = useIO()
-
   const handleMultipleExport = async () => {
     await useIOProps.exportMultipleTodosAsZip(selectedFiles)
   }
@@ -62,6 +62,7 @@ const ExportTodo: FC<IExportTodo> = ({ todos, onCancel }) => {
               <span>(&nbsp;.todolistx&nbsp;)</span>
             </p>
           </HeaderSection>
+
           <ControllerSectionItem>
             <SearchSection>
               <SearchSVG aria-label="search todos" />
@@ -143,8 +144,6 @@ const ExportTodoWrapper = styled.div`
   gap: 23px;
   padding: 20px;
   height: 54vh;
-  border: 0px solid #eaeaea;
-  border-radius: 5px;
 `
 const EmptyTodoWrapper = styled.div`
   text-align: center;

@@ -36,9 +36,15 @@ const Modal: FC<IModal> = ({ modalProps, children, title }) => {
   const { dialogRef, closeModal } = modalProps
 
   return (
-    <ModalWrapper ref={dialogRef}>
+    <ModalWrapper
+      ref={dialogRef}
+      role="dialog"
+      data-testid="definition"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
       <HeaderSection>
-        <p>{title}</p>
+        <p id="modal-title">{title}</p>
         <CloseSVG
           className="close"
           aria-label="close modal"
