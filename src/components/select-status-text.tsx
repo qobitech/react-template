@@ -44,6 +44,9 @@ const TodoStatusController = styled.select`
   outline: none;
   background: transparent;
   font-size: 11px;
+  @media (max-width: 1200px) {
+    font-size: 16px;
+  }
 `
 
 const TodoStatus = styled.div<{ $status: todoStatusType }>`

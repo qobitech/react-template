@@ -53,26 +53,70 @@ export function base64ToArrayBuffer(base64: string): Uint8Array {
 
 // Generate UUID for export ID
 export function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = (Math.random() * 16) | 0
-    const v = c === 'x' ? r : (r & 0x3) | 0x8
-    return v.toString(16)
-  })
+  // Get high-precision timestamp
+  const timestamp = performance.now().toString().replace('.', '')
+
+  // Browser-specific entropy
+  const browserEntropy = navigator.userAgent
+    .split('')
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0)
+    .toString(16)
+
+  // Random component
+  const getRandomSegment = (length: number) => {
+    return Array.from(crypto.getRandomValues(new Uint8Array(length)))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')
+  }
+
+  // Combine parts into UUID format
+  const p1 = timestamp.slice(0, 8)
+  const p2 = timestamp.slice(8, 12)
+  const p3 = '4' + browserEntropy.slice(0, 3) // Version 4 UUID
+  const p4 =
+    (Math.floor(Math.random() * 4) + 8).toString(16) + timestamp.slice(-3) // RFC 4122 variant
+  const p5 = getRandomSegment(6)
+
+  return `${p1}-${p2}-${p3}-${p4}-${p5}`
 }
 
 // Generate visual hash for user recognition
 export function generateVisualHash(data: any): string {
-  // This would create a simple hash that can be converted to a visual pattern
-  // For example, a color code or pattern of symbols
-  let hash = 0
   const str = JSON.stringify(data)
+
+  // Create RGB components using different hash algorithms
+  let hashR = 5381
+  let hashG = 52711
+  let hashB = 1313
+
   for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i)
-    hash |= 0 // Convert to 32bit integer
+    const char = str.charCodeAt(i)
+    // Different modifications for each component
+    hashR = ((hashR << 5) + hashR) ^ char
+    hashG = (hashG << 4) + hashG + char
+    hashB = char + (hashB << 6) + (hashB << 16) - hashB
   }
 
-  // Convert to hex color
-  return '#' + ((hash & 0xffffff) | 0x1000000).toString(16).substring(1)
+  // Normalize to 0-255 range
+  const r = Math.abs(hashR % 256)
+  const g = Math.abs(hashG % 256)
+  const b = Math.abs(hashB % 256)
+
+  // Convert to hex color with brightness adjustment to ensure readability
+  // Ensure at least one component is > 150 for visibility
+  const adjustBrightness =
+    r + g + b < 300 ? 150 + Math.floor(Math.random() * 105) : 0
+
+  const finalR = Math.min(255, r + (r < 100 ? adjustBrightness : 0))
+  const finalG = Math.min(255, g + (g < 100 && r >= 100 ? adjustBrightness : 0))
+  const finalB = Math.min(
+    255,
+    b + (b < 100 && r >= 100 && g >= 100 ? adjustBrightness : 0)
+  )
+
+  return `#${finalR.toString(16).padStart(2, '0')}${finalG
+    .toString(16)
+    .padStart(2, '0')}${finalB.toString(16).padStart(2, '0')}`
 }
 
 // User fingerprint for device identification
@@ -170,24 +214,74 @@ export function encodeData(data: string): Uint8Array {
   const encoder = new TextEncoder()
   const bytes = encoder.encode(data)
 
-  // Apply a simple XOR cipher with a key
-  const key = [0x42, 0x57, 0x31, 0x9a] // Your custom key
+  // Create output array
   const encoded = new Uint8Array(bytes.length)
 
+  // More complex key with mixed values
+  const primaryKey = [0x3f, 0x8d, 0x2c, 0xa5, 0x76, 0xe1, 0x19, 0xb4]
+
+  // Rolling key modification based on data content
+  let rollingModifier = (bytes.length % 251) + 7
+
+  // Process each byte with a more complex algorithm
   for (let i = 0; i < bytes.length; i++) {
-    encoded[i] = bytes[i] ^ key[i % key.length]
+    // Get the base key byte for this position
+    const keyByte = primaryKey[i % primaryKey.length]
+
+    // Apply a position-dependent transformation
+    const positionFactor = i % 3 === 0 ? 1 : i % 3 === 1 ? 2 : 3
+
+    // Calculate the modified key byte
+    const modifiedKey = (keyByte + i) % 256 ^ rollingModifier
+
+    // Encode the byte using XOR and rotation
+    let result = bytes[i] ^ modifiedKey
+    result =
+      ((result << positionFactor) | (result >> (8 - positionFactor))) & 0xff
+
+    // Store the result
+    encoded[i] = result
+
+    // Update rolling modifier based on input byte for added variability
+    rollingModifier = (rollingModifier * 17 + bytes[i] * 13) % 251
   }
 
   return encoded
 }
 
 export function decodeData(encoded: Uint8Array): string {
-  // Same XOR key as in encodeData
-  const key = [0x42, 0x57, 0x31, 0x9a]
+  // Create output array
   const decoded = new Uint8Array(encoded.length)
 
+  // Same key as in encodeData
+  const primaryKey = [0x3f, 0x8d, 0x2c, 0xa5, 0x76, 0xe1, 0x19, 0xb4]
+
+  // Initialize rolling modifier the same way
+  let rollingModifier = (encoded.length % 251) + 7
+
+  // Reverse the encoding process
   for (let i = 0; i < encoded.length; i++) {
-    decoded[i] = encoded[i] ^ key[i % key.length]
+    // Get the base key byte for this position
+    const keyByte = primaryKey[i % primaryKey.length]
+
+    // Apply the same position-dependent transformation
+    const positionFactor = i % 3 === 0 ? 1 : i % 3 === 1 ? 2 : 3
+
+    // Calculate the modified key byte
+    const modifiedKey = (keyByte + i) % 256 ^ rollingModifier
+
+    // Decode by reversing rotation and XOR
+    let result = encoded[i]
+    result =
+      ((result >> positionFactor) | (result << (8 - positionFactor))) & 0xff
+    result = result ^ modifiedKey
+
+    // Store the result
+    decoded[i] = result
+
+    // Update rolling modifier based on decoded byte
+    // We must use the decoded byte here to ensure the sequence matches during encoding
+    rollingModifier = (rollingModifier * 17 + result * 13) % 251
   }
 
   // Convert bytes back to string

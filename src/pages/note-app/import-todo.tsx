@@ -67,6 +67,7 @@ const ImportTodo: FC<IImportTodoProps> = ({ onClose }) => {
             ref={inputRef}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
+            accept=".todolistx"
             multiple
           />
 
