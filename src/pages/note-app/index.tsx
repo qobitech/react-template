@@ -294,6 +294,7 @@ const TodoClass = styled.div`
     border: none;
     padding: 10px 5px;
     border-radius: 5px;
+    color: #000000;
     @media (max-width: 1200px) {
       font-size: 16px;
     }
@@ -323,6 +324,7 @@ export const ButtonComponent = styled.button`
   border: 1px solid #eaeaea;
   cursor: pointer;
   border-radius: 5px;
+  color: #000000;
   font-size: 12px;
   padding: 2px 5px;
   display: flex;
