@@ -62,21 +62,20 @@ const ExportTodo: FC<IExportTodo> = ({ todos, onCancel }) => {
               <span>(&nbsp;.todolistx&nbsp;)</span>
             </p>
           </HeaderSection>
+          <ControllerSectionItem>
+            <SearchSection>
+              <SearchSVG aria-label="search todos" />
+
+              <input
+                placeholder="Search todos"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                type="search"
+              />
+            </SearchSection>
+          </ControllerSectionItem>
 
           <SelectSection>
-            <ControllerSectionItem>
-              <SearchSection>
-                <SearchSVG aria-label="search todos" />
-
-                <input
-                  placeholder="Search todos"
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  type="search"
-                />
-              </SearchSection>
-            </ControllerSectionItem>
-
             <SelectSectionItem>
               <SelectCheckBox
                 type="checkbox"
@@ -165,6 +164,9 @@ const SelectSection = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
+  height: 35vh;
+  overflow: auto;
+  border-bottom: 0.1px solid #eaeaea;
 `
 const ControllerSectionItem = styled.div`
   display: flex;
@@ -218,7 +220,7 @@ const SelectCheckBox = styled.input`
 `
 const HeaderSection = styled.div`
   text-align: center;
-  margin-bottom: 25px;
+  margin-bottom: 22px;
   p {
     margin: 0;
   }
