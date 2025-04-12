@@ -294,6 +294,9 @@ const TodoClass = styled.div`
     border: none;
     padding: 10px 5px;
     border-radius: 5px;
+    @media (max-width: 1200px) {
+      font-size: 16px;
+    }
   }
 `
 const HeaderClass = styled.div`
