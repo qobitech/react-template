@@ -144,4 +144,9 @@ const HeaderRightClass = styled.div`
   display: flex;
   align-items: center;
   gap: 27px;
+  @media (max-width: 1200px) {
+    svg {
+      height: 16px;
+    }
+  }
 `

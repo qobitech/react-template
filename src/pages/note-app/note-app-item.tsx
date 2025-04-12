@@ -58,6 +58,9 @@ const SavedNoteItemClass = styled.div`
     white-space: nowrap;
     width: 100%;
     cursor: pointer;
+    @media (max-width: 1200px) {
+      font-size: 16px;
+    }
   }
   .time-stamp {
     font-size: 10px;
@@ -74,4 +77,9 @@ const CTAClass = styled.div`
   align-items: center;
   gap: 30px;
   margin-top: 10px;
+  @media (max-width: 1200px) {
+    svg {
+      height: 16px;
+    }
+  }
 `
