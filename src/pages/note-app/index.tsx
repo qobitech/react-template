@@ -214,14 +214,14 @@ const NotesApp = () => {
           <Todo setNote={setNote} note={note} handleSaveNote={handleSaveNote} />
         </DragDropContext>
 
-        <button
+        {/* <button
           onClick={async () => {
             await handleSaveNote('text', note.text)
           }}
           className="btn"
         >
           Save Todo List
-        </button>
+        </button> */}
       </TodoClass>
 
       <SavedTodos />
