@@ -7,13 +7,7 @@ import SavedTodos from './saved-todos'
 import { DragDropContext, DropResult } from 'react-beautiful-dnd'
 import { ITodos } from '../../interface'
 import { useDBContext } from '../../context/db'
-
-const defaultNote: Omit<ITodos, 'id'> = {
-  text: '',
-  title: '',
-  timeStamp: Date.now(),
-  todo: []
-}
+import { defaultNote } from '../../app'
 
 const NotesApp = () => {
   const [syncInProgress, setSyncInProgress] = useState<boolean>(false) // Stores the list of saved notes
@@ -213,15 +207,6 @@ const NotesApp = () => {
         <DragDropContext onDragEnd={onDragEnd}>
           <Todo setNote={setNote} note={note} handleSaveNote={handleSaveNote} />
         </DragDropContext>
-
-        {/* <button
-          onClick={async () => {
-            await handleSaveNote('text', note.text)
-          }}
-          className="btn"
-        >
-          Save Todo List
-        </button> */}
       </TodoClass>
 
       <SavedTodos />

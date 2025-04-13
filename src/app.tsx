@@ -13,7 +13,8 @@ export const defaultNote: Omit<ITodos, 'id'> = {
 }
 
 const App = () => {
-  const dbProps = useSync<ITodos>({ ...defaultNote, id: uuidv4() }) // Custom hook to manage offline storage
+  const dbProps = useSync<ITodos>({ ...defaultNote, id: uuidv4() })
+
   return (
     <div>
       <DBContext.Provider value={{ ...dbProps }}>
