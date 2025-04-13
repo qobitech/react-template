@@ -228,7 +228,7 @@ const NotesApp = () => {
 
       <FooterClass>
         <p>
-          Developed by:{' '}
+          Mini-project by:{' '}
           <a
             href="https://www.linkedin.com/in/frank-aiywa-kobi/"
             target="_blank"
