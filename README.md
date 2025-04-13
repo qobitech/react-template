@@ -1,25 +1,27 @@
 # Notes App
 
-An offline-capable React notes app that allows users to create, edit, and sync notes seamlessly when back online.
+A Template for a new React Project.
 
 ## Features
 
-- Create and edit notes with a title and content
+- Vite configuration setup
 
-- Works both online and offline
+- Indexdb setup for offline syncing
 
-- Automatically syncs offline notes when reconnected
+- Vitest configuration setup
 
-- Saves notes locally if network is unavailable
+- Vitest coverage configuration setup
 
-- Debouncing to optimize saving performance
+- Prettier configuration setup
+
+- ES-Lint configuration setup
 
 ## Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/qobitech/note-app.git
-cd notes-app
+git clone https://github.com/qobitech/react-template.git
+cd react-template
 
 # Install dependencies
 npm install
@@ -28,56 +30,18 @@ npm install
 npm run dev
 ```
 
-## How It Works
+## Resources
 
-### State Management
+Vite:
 
-The app uses useState to track:
+[Upgrade Your React App with Vite: Faster Builds, Real-Time ESLint Feedback, and Cleaner Files](https://medium.com/@edekobifrank/upgrade-your-react-app-with-vite-faster-builds-real-time-eslint-feedback-and-cleaner-files-c37b5b0f1ed0)
 
-- note: Currently edited note
+React Testing with Vite:
 
-- syncInProgress: Sync status
+[Setting Up Testing in Your Vite React (Typescript) Project: A Simple Guide](https://medium.com/@edekobifrank/setting-up-testing-in-your-vite-react-typescript-project-a-simple-guide-4e4ac0c832b0)
 
-### Network Status Tracking
+[Vitest.config.ts File Explained](https://medium.com/@edekobifrank/vite-config-ts-file-explained-716b7b29f862)
 
-A custom hook useNetworkStatus() detects if the user is online or offline.
+Index DB:
 
-### Offline Data Handling
-
-useSync() manages local storage, allowing users to:
-
-- Save notes offline
-
-- Retrieve unsynced notes
-
-- Clear notes after syncing
-
-### Auto-Saving Notes
-
-- If online, notes save directly to the server.
-
-- If offline, notes are stored locally and sync when back online.
-
-### Debouncing Input
-
-A 500ms delay prevents excessive API calls while typing.
-
-### Syncing Offline Notes
-
-When the user reconnects:
-
-- Unsynced notes are sent to the server.
-
-- Synced notes are removed from local storage.
-
-## Usage
-
-- Start the app using npm run dev.
-
-- Write notes, even without an internet connection.
-
-- Notes will sync automatically when you go back online.
-
-## Contributing
-
-Contributions are welcome! Please fork the repository and submit a pull request.
+[Building Resilient React Apps: Offline Sync for Unstable Networks](https://medium.com/@edekobifrank/building-resilient-react-apps-offline-sync-for-unstable-networks-2374e91f597b)
