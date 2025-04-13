@@ -1,4 +1,4 @@
-# Notes App
+# React Template
 
 A Template for a new React Project.
 
