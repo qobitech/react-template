@@ -103,9 +103,8 @@ export function generateVisualHash(data: any): string {
   const b = Math.abs(hashB % 256)
 
   // Convert to hex color with brightness adjustment to ensure readability
-  // Ensure at least one component is > 150 for visibility
   const adjustBrightness =
-    r + g + b < 300 ? 150 + Math.floor(Math.random() * 105) : 0
+    r + g + b < 300 ? Math.min(255 - Math.max(r, g, b), 150) : 0
 
   const finalR = Math.min(255, r + (r < 100 ? adjustBrightness : 0))
   const finalG = Math.min(255, g + (g < 100 && r >= 100 ? adjustBrightness : 0))
@@ -114,9 +113,14 @@ export function generateVisualHash(data: any): string {
     b + (b < 100 && r >= 100 && g >= 100 ? adjustBrightness : 0)
   )
 
-  return `#${finalR.toString(16).padStart(2, '0')}${finalG
+  const lightness = 0.9 // Higher value = lighter color (0-1 range)
+  const lightR = Math.floor(finalR + (255 - finalR) * lightness)
+  const lightG = Math.floor(finalG + (255 - finalG) * lightness)
+  const lightB = Math.floor(finalB + (255 - finalB) * lightness)
+
+  return `#${lightR.toString(16).padStart(2, '0')}${lightG
     .toString(16)
-    .padStart(2, '0')}${finalB.toString(16).padStart(2, '0')}`
+    .padStart(2, '0')}${lightB.toString(16).padStart(2, '0')}`
 }
 
 // User fingerprint for device identification

@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import moment from 'moment'
 import { TrashSVG } from '../../svg-icons'
 import { ITodos } from '../../interface'
+import { generateVisualHash } from '../../helper'
 
 interface ISavedNoteItem {
   note: ITodos
@@ -11,8 +12,11 @@ interface ISavedNoteItem {
 }
 
 const SavedNoteItem: FC<ISavedNoteItem> = ({ note, onClick, onDelete }) => {
+  const bg = generateVisualHash(note)
+
+  console.log(bg, 'juju')
   return (
-    <SavedNoteItemWarpperClass>
+    <SavedNoteItemWarpperClass style={{ background: bg }}>
       <SavedNoteItemClass onClick={onClick}>
         <h5 className="header">{note.title || note.text}</h5>
 
@@ -40,7 +44,7 @@ const SavedNoteItemWarpperClass = styled.div`
   flex-direction: column;
   gap: 10px;
   padding: 15px;
-  border: 1px solid #eaeaea;
+  border: 0px solid #eaeaea;
   border-radius: 5px;
   box-sizing: border-box;
 `

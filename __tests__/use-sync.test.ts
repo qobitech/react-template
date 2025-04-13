@@ -8,6 +8,11 @@ interface MockItem {
   name: string
 }
 
+const defaultItem = {
+  id: '',
+  name: ''
+}
+
 describe('useSync Hook', () => {
   const sampleData: MockItem[] = [
     { id: '1', name: 'Item One' },
@@ -27,7 +32,7 @@ describe('useSync Hook', () => {
   })
 
   it('should save and retrieve offline updates', async () => {
-    const { result } = renderHook(() => useSync<MockItem>())
+    const { result } = renderHook(() => useSync<MockItem>(defaultItem))
 
     await act(async () => {
       await result.current.saveOfflineUpdate(sampleData)
@@ -41,7 +46,7 @@ describe('useSync Hook', () => {
   })
 
   it('should remove a specific offline item', async () => {
-    const { result } = renderHook(() => useSync<MockItem>())
+    const { result } = renderHook(() => useSync<MockItem>(defaultItem))
 
     await act(async () => {
       await result.current.saveOfflineUpdate(sampleData)
@@ -56,7 +61,7 @@ describe('useSync Hook', () => {
   })
 
   it('should clear all offline updates', async () => {
-    const { result } = renderHook(() => useSync<MockItem>())
+    const { result } = renderHook(() => useSync<MockItem>(defaultItem))
 
     await act(async () => {
       await result.current.saveOfflineUpdate(sampleData)
@@ -70,7 +75,7 @@ describe('useSync Hook', () => {
   })
 
   it('should call syncFunction and clear offline updates on success', async () => {
-    const { result } = renderHook(() => useSync<MockItem>())
+    const { result } = renderHook(() => useSync<MockItem>(defaultItem))
 
     const mockSyncFn = vi.fn().mockResolvedValue(undefined)
 
@@ -87,7 +92,7 @@ describe('useSync Hook', () => {
   })
 
   it('should NOT clear offline updates if sync fails', async () => {
-    const { result } = renderHook(() => useSync<MockItem>())
+    const { result } = renderHook(() => useSync<MockItem>(defaultItem))
 
     const mockSyncFn = vi.fn().mockRejectedValue(new Error('Sync failed'))
 

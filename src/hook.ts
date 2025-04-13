@@ -4,7 +4,6 @@ import { sanitizeFileName } from './helper'
 import JSZip from 'jszip'
 import { ITodos } from './interface'
 import { convertFileToTodo, exportTodos } from './utils'
-import { v4 as uuidv4 } from 'uuid'
 
 export const useNetworkStatus = (): boolean => {
   const [isOnline, setIsOnline] = useState(navigator.onLine)
@@ -32,19 +31,14 @@ export interface IUseSync<T = undefined> {
   offlineData: T[] | undefined
   syncToServer: (syncFunction: (updates: T[]) => Promise<void>) => Promise<void>
   removeOfflineItem: (id: string) => Promise<void>
-  setNote: React.Dispatch<React.SetStateAction<ITodos>>
-  note: ITodos
+  setNote: React.Dispatch<React.SetStateAction<T>>
+  note: T
 }
 
-export const defaultNote: Omit<ITodos, 'id'> = {
-  text: '',
-  title: '',
-  timeStamp: Date.now(),
-  todo: []
-}
-
-export const useSync = <T extends { id: string } = any>(): IUseSync<T> => {
-  const [note, setNote] = useState<ITodos>({ ...defaultNote, id: uuidv4() }) // Stores the current note being typed
+export const useSync = <T extends { id: string } = any>(
+  defaultNote: T
+): IUseSync<T> => {
+  const [note, setNote] = useState<T>(defaultNote) // Stores the current note being typed
   const [offlineData, setOfflineData] = useState<T[]>([])
 
   const version = 3
@@ -125,7 +119,7 @@ export const useSync = <T extends { id: string } = any>(): IUseSync<T> => {
     const db = await openDB('SyncDB', version)
     await db.clear('updates')
     setOfflineData([])
-    setNote({ ...defaultNote, id: uuidv4() })
+    setNote(defaultNote)
   }
 
   const removeOfflineItem = async (id: string) => {
