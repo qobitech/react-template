@@ -16,7 +16,6 @@ const defaultNote: Omit<ITodos, 'id'> = {
 }
 
 const NotesApp = () => {
-  const [note, setNote] = useState<ITodos>({ ...defaultNote, id: uuidv4() }) // Stores the current note being typed
   const [syncInProgress, setSyncInProgress] = useState<boolean>(false) // Stores the list of saved notes
 
   const debounceTimeout = useRef<number | null>(null) // Reference to track debounce timing
@@ -24,7 +23,8 @@ const NotesApp = () => {
 
   const isOnline = useNetworkStatus() // Custom hook to check internet status
 
-  const { saveOfflineUpdate, getOfflineUpdates, offlineData } = useDBContext()
+  const { saveOfflineUpdate, getOfflineUpdates, offlineData, setNote, note } =
+    useDBContext()
 
   /**
    * Saves a note to the server.
@@ -224,7 +224,7 @@ const NotesApp = () => {
         </button>
       </TodoClass>
 
-      <SavedTodos setNote={setNote} note={note} />
+      <SavedTodos />
 
       <FooterClass>
         <p>

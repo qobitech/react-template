@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import SavedNoteItem from './note-app-item'
 import { ButtonComponent } from '.'
-import { FC, useCallback } from 'react'
+import { useCallback } from 'react'
 import { ExportSVG, ImportSVG } from '../../svg-icons'
 import Modal, { useModal } from '../../components/modal'
 import ExportTodo from './export-todo'
@@ -9,13 +9,9 @@ import ImportTodo from './import-todo'
 import { ITodos } from '../../interface'
 import { useDBContext } from '../../context/db'
 
-interface ISavedTodosProps {
-  setNote: React.Dispatch<React.SetStateAction<ITodos>>
-  note: ITodos
-}
-
-const SavedTodos: FC<ISavedTodosProps> = ({ setNote, note }) => {
-  const { clearOfflineUpdates, offlineData, removeOfflineItem } = useDBContext()
+const SavedTodos = () => {
+  const { clearOfflineUpdates, offlineData, removeOfflineItem, setNote, note } =
+    useDBContext()
 
   const handleClearAll = async () => {
     await clearOfflineUpdates() // Clear them after successful sync
