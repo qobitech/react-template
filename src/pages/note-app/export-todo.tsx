@@ -100,6 +100,7 @@ const ExportTodo: FC<IExportTodo> = ({ todos, onCancel }) => {
                 />
 
                 <p>{todo.title}</p>
+
                 <ExportSVG
                   className="export"
                   aria-label="export todo item"
@@ -127,7 +128,7 @@ const ExportTodo: FC<IExportTodo> = ({ todos, onCancel }) => {
             </ButtonComponent>
 
             <ButtonCancelComponent onClick={onCancel}>
-              Cancel
+              Close
             </ButtonCancelComponent>
           </CTASection>
         </ExportTodosSection>
