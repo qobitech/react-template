@@ -7,22 +7,16 @@ import Modal, { useModal } from '../../components/modal'
 import ExportTodo from './export-todo'
 import ImportTodo from './import-todo'
 import { ITodos } from '../../interface'
+import { useDBContext } from '../../context/db'
 
 interface ISavedTodosProps {
-  offlineData: ITodos[] | undefined
-  removeOfflineItem: (id: string) => Promise<void>
-  clearOfflineUpdates: () => Promise<void>
   setNote: React.Dispatch<React.SetStateAction<ITodos>>
   note: ITodos
 }
 
-const SavedTodos: FC<ISavedTodosProps> = ({
-  offlineData,
-  removeOfflineItem,
-  clearOfflineUpdates,
-  setNote,
-  note
-}) => {
+const SavedTodos: FC<ISavedTodosProps> = ({ setNote, note }) => {
+  const { clearOfflineUpdates, offlineData, removeOfflineItem } = useDBContext()
+
   const handleClearAll = async () => {
     await clearOfflineUpdates() // Clear them after successful sync
   }

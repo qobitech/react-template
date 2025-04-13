@@ -24,7 +24,7 @@ export const useNetworkStatus = (): boolean => {
   return isOnline
 }
 
-interface IUseSync<T = undefined> {
+export interface IUseSync<T = undefined> {
   saveOfflineUpdate: (update: T[]) => Promise<void>
   clearOfflineUpdates: () => Promise<void>
   getOfflineUpdates: () => Promise<T[]>

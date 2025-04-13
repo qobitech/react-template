@@ -2,8 +2,8 @@ import React, { FC, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { ButtonComponent } from '.'
 import { CheckSVG, ImportSVG } from '../../svg-icons'
-import { IReport, useIO, useSync } from '../../hook'
-import { ITodos } from '../../interface'
+import { IReport, useIO } from '../../hook'
+import { useDBContext } from '../../context/db'
 
 interface IImportTodoProps {
   onClose: () => void
@@ -11,13 +11,14 @@ interface IImportTodoProps {
 
 const ImportTodo: FC<IImportTodoProps> = ({ onClose }) => {
   const useIOProps = useIO()
-  const { saveOfflineUpdate, offlineData } = useSync<ITodos>()
+
+  const { saveOfflineUpdate, offlineData } = useDBContext()
 
   const [reports, setReports] = useState<IReport[] | null>(null)
 
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const handleUpload = async (todoFiles: File[]) => {
+  const handleImport = async (todoFiles: File[]) => {
     if (todoFiles?.length) {
       const { todos, reports } = await useIOProps.importMultipleTodosFromFile(
         todoFiles
@@ -34,13 +35,13 @@ const ImportTodo: FC<IImportTodoProps> = ({ onClose }) => {
   }: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = target
     const todoFiles = Array.from(files || [])
-    await handleUpload(todoFiles)
+    await handleImport(todoFiles)
   }
 
   const handleDrop = async (event: React.DragEvent<HTMLInputElement>) => {
     event.preventDefault()
     const todoFiles = Array.from(event.dataTransfer.files)
-    await handleUpload(todoFiles)
+    await handleImport(todoFiles)
   }
 
   const handleDragOver = (event: React.DragEvent<HTMLInputElement>) => {

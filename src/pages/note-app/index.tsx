@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useNetworkStatus, useSync } from '../../hook'
+import { useNetworkStatus } from '../../hook'
 import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
 import Todo from './todo'
 import SavedTodos from './saved-todos'
 import { DragDropContext, DropResult } from 'react-beautiful-dnd'
 import { ITodos } from '../../interface'
+import { useDBContext } from '../../context/db'
 
 const defaultNote: Omit<ITodos, 'id'> = {
   text: '',
@@ -23,13 +24,7 @@ const NotesApp = () => {
 
   const isOnline = useNetworkStatus() // Custom hook to check internet status
 
-  const {
-    saveOfflineUpdate,
-    getOfflineUpdates,
-    clearOfflineUpdates,
-    offlineData,
-    removeOfflineItem
-  } = useSync<ITodos>() // Custom hook to manage offline storage
+  const { saveOfflineUpdate, getOfflineUpdates, offlineData } = useDBContext()
 
   /**
    * Saves a note to the server.
@@ -229,13 +224,8 @@ const NotesApp = () => {
         </button>
       </TodoClass>
 
-      <SavedTodos
-        offlineData={offlineData}
-        removeOfflineItem={removeOfflineItem}
-        clearOfflineUpdates={clearOfflineUpdates}
-        setNote={setNote}
-        note={note}
-      />
+      <SavedTodos setNote={setNote} note={note} />
+
       <FooterClass>
         <p>
           Developed by:{' '}
