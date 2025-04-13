@@ -105,7 +105,14 @@ const ImportTodo: FC<IImportTodoProps> = ({ onClose }) => {
           {reports.length ? (
             <ButtonComponent onClick={onReset}>Reset</ButtonComponent>
           ) : (
-            <ButtonComponent onClick={onClose}>Close</ButtonComponent>
+            <ButtonComponent
+              onClick={() => {
+                onReset()
+                onClose()
+              }}
+            >
+              Close
+            </ButtonComponent>
           )}
         </CTASection>
       ) : null}
